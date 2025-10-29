@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { HomePage } from "@/pages/HomePage/HomePage.jsx";
 import LoginPage from './pages/LoginPage/LoginPage'; // Vamos assumir que está em 'src/pages/LoginPage.jsx'
+import RegisterPage from './pages/RegisterPage/RegisterPage';
 
 function App() {
   /*
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       {/* Você pode adicionar mais rotas aqui, ex: <Route path="/register" element={<RegisterPage />} /> */}
     </Routes>
   );
