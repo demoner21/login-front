@@ -1,9 +1,8 @@
-// src/features/LoginForm/LoginForm.jsx
-
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Usamos Link para navegação
+import { Link, useNavigate } from 'react-router-dom';
 import { LogoPlaceholder } from '../../shared/ui/LogoPlaceholder';
+import { useAuth } from '../../context/AuthContext';
 
 export const LoginForm = () => {
     // Estado para os campos do formulário
@@ -11,14 +10,31 @@ export const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
-    // const [isLoading, setIsLoading] = useState(false); // Útil para a submissão
+    const [isLoading, setIsLoading] = useState(false);
+
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     // Handler para o submit
     const handleSubmit = (e) => {
         e.preventDefault();
-        // setIsLoading(true);
+        setIsLoading(true);
         // Aqui iria a lógica de login com a API
         console.log('Login attempt:', { email, password, rememberMe });
+
+        setTimeout(() => {
+            console.log('Login bem-sucedido (simulado)! Redirecionando...');
+
+            // Aqui você salvaria o token, etc.
+            // ex: auth.login(token);
+            login();
+            setIsLoading(false); // Desativa o "carregando"
+
+            // 3. AÇÃO DE REDIRECIONAMENTO
+            // Redireciona o usuário para a página inicial (route '/')
+            navigate('/dashboard');
+
+        }, 1500); // Simula 1.5 segundos de espera da API
     };
 
     return (
