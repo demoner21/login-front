@@ -1,7 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
 import { HomePage } from "@/pages/HomePage/HomePage.jsx";
-import LoginPage from './pages/LoginPage/LoginPage'; // Vamos assumir que está em 'src/pages/LoginPage.jsx'
+import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
+import DashboardPage from './pages/DashboardPage/DashboardPage';
+import ProtectedRoute from './routes/ProtectedRoute';
+import MainLayout from './layouts/MainLayout';
+
+const FarmMapPage = () => <div className="text-2xl font-bold">Página Farm Map</div>;
+const CropsPage = () => <div className="text-2xl font-bold">Página Crops</div>;
+const ReportsPage = () => <div className="text-2xl font-bold">Página Reports</div>;
+const ProfilePage = () => <div className="text-2xl font-bold">Página Profile</div>;
 
 function App() {
   /*
@@ -11,10 +19,26 @@ function App() {
    */
   return (
     <Routes>
+      {/* Rotas Públicas */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      {/* Você pode adicionar mais rotas aqui, ex: <Route path="/register" element={<RegisterPage />} /> */}
+
+      {/* Rotas Privadas */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+
+          {/* Nossas rotas filhas */}
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/farm-map" element={<FarmMapPage />} />
+          <Route path="/crops" element={<CropsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+
+          {/* Adicione outras rotas privadas aqui... */}
+        </Route>
+      </Route>
+
     </Routes>
   );
 }
