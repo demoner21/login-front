@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage/DashboardPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import MainLayout from './layouts/MainLayout';
 import FarmMapPage from './pages/FarmMapPage/FarmMapPage'
+import TaskPage from './pages/TaskPage/TaskPage';
 
 const CropsPage = () => <div className="text-2xl font-bold">Página Crops</div>;
 const ReportsPage = () => <div className="text-2xl font-bold">Página Reports</div>;
@@ -27,6 +28,7 @@ function App() {
           <Route path="/crops" element={<CropsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/tasks" element={<TaskPage />} />
 
         </Route>
       </Route>

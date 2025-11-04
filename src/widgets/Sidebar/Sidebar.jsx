@@ -1,9 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Map, Sprout, BarChart3, User, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Map, Sprout, BarChart3, User, LogOut, Menu, X, ClipboardList } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-// NavItem não muda
+
 const NavItem = ({ to, icon: Icon, isExpanded, children }) => {
     return (
         <NavLink
@@ -24,15 +24,12 @@ const NavItem = ({ to, icon: Icon, isExpanded, children }) => {
 
 export const Sidebar = ({ isExpanded, toggleSidebar }) => {
     const { logout } = useAuth();
-
     return (
-        // O fundo 'bg-white' está correto
         <div
             className={`flex h-screen flex-col bg-white transition-all duration-300
         ${isExpanded ? 'w-64' : 'w-20'}
       `}
         >
-            {/* 1. MUDANÇA: Removido 'border-b border-gray-200' */}
             <div className="flex h-16 items-center justify-center">
                 <button
                     onClick={toggleSidebar}
@@ -42,10 +39,8 @@ export const Sidebar = ({ isExpanded, toggleSidebar }) => {
                 </button>
             </div>
 
-            {/* 2. Seção de Navegação Principal */}
             <div className="flex-1 overflow-y-auto p-3">
                 <nav className="space-y-2">
-                    {/* Passa 'isExpanded' para cada NavItem */}
                     <NavItem to="/dashboard" icon={LayoutDashboard} isExpanded={isExpanded}>
                         Overview
                     </NavItem>
@@ -58,10 +53,14 @@ export const Sidebar = ({ isExpanded, toggleSidebar }) => {
                     <NavItem to="/reports" icon={BarChart3} isExpanded={isExpanded}>
                         Reports
                     </NavItem>
+
+                    <NavItem to="/tasks" icon={ClipboardList} isExpanded={isExpanded}>
+                        Tarefas
+                    </NavItem>
+
                 </nav>
             </div>
 
-            {/* 3. MUDANÇA: Removido 'border-t border-gray-200' */}
             <div className={`p-3`}>
                 <NavItem to="/profile" icon={User} isExpanded={isExpanded}>
                     Natasha Bunny
