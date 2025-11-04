@@ -12,20 +12,19 @@ const MainLayout = () => {
 
     return (
         <div className="flex h-screen bg-white">
-
             <Sidebar
                 isExpanded={isSidebarExpanded}
                 toggleSidebar={toggleSidebar}
             />
-
             <div className="flex flex-1 flex-col overflow-hidden">
-
                 <Topbar />
 
-                <main className="flex-1 overflow-y-auto bg-gray-50 p-6 rounded-tl-2xl">
-
+                {/* MUDANÇA AQUI: 
+                  Removemos 'p-6' e 'rounded-tl-2xl' do <main>.
+                  Isso permite que o conteúdo da página preencha 100% da área.
+                */}
+                <main className="flex-1 overflow-y-auto bg-gray-50">
                     <Outlet />
-
                 </main>
             </div>
         </div>

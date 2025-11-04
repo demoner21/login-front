@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+/* O container dos botões de zoom (+ e -) */
+.leaflet-control-zoom {
+    border: none !important;
+    margin-bottom: 24px !important;
+    /* Ajusta a posição para cima do canto */
+    margin-left: 24px !important;
+
+    /* 1. Glassmorphism */
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    /* Suporte para Safari */
+
+    /* 2. Arredondado (como na sua imagem) */
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Os botões individuais */
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+    background-color: transparent !important;
+    color: black !important;
+    /* Símbolos + e - pretos para contraste */
+    font-weight: 600 !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+}
+
+/* A linha separadora */
+.leaflet-control-zoom-in {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Ajusta o arredondamento para o container "pill" */
+.leaflet-control-zoom-in {
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.leaflet-control-zoom-out {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-left-radius: 12px !important;
+    border-bottom-right-radius: 12px !important;
+}
