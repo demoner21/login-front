@@ -1,13 +1,12 @@
 import React from 'react';
-import { Calendar, Tag, Info } from 'lucide-react';
+import { Calendar, Tag } from 'lucide-react'; // 'Info' removido pois está comentado
 
+// (priorityStyles e statusStyles não mudam)
 const priorityStyles = {
     'Baixa': 'border-green-500 bg-green-50',
     'Média': 'border-yellow-500 bg-yellow-50',
     'Alta': 'border-red-500 bg-red-50',
 };
-
-// Mapeamento de status para cores
 const statusStyles = {
     'Pendente': 'text-gray-600 bg-gray-200',
     'In Progress': 'text-blue-600 bg-blue-100',
@@ -19,21 +18,26 @@ export const TaskItem = ({ task }) => {
     const priorityClass = priorityStyles[task.priority] || 'border-gray-300 bg-gray-50';
     const statusClass = statusStyles[task.status] || 'text-gray-600 bg-gray-200';
 
+    // --- MUDANÇAS AQUI ---
+    // 1. Padding principal 'p-4' (1rem) alterado para 'p-3' (0.75rem)
     return (
-        <div className={`rounded-lg p-4 shadow-sm border-l-4 ${priorityClass}`}>
+        <div className={`rounded-lg p-3 shadow-sm border-l-4 ${priorityClass}`}>
             <div className="flex justify-between items-start">
                 {/* Título e Descrição */}
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                    {/* 2. Tamanho da fonte do título 'text-lg' para 'text-base' (menor) */}
+                    <h3 className="text-base font-semibold text-gray-900">{task.title}</h3>
+                    {/* 3. Margem superior da descrição 'mt-1' removida */}
+                    <p className="text-sm text-gray-600">{task.description}</p>
                 </div>
-                {/* Status */}
+                {/* Status (sem alteração) */}
                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusClass}`}>
                     {task.status}
                 </span>
             </div>
 
-            <div className="flex items-center gap-6 text-sm text-gray-500 mt-4">
+            {/* 4. Margem superior 'mt-4' (1rem) alterada para 'mt-2' (0.5rem) */}
+            <div className="flex items-center gap-6 text-sm text-gray-500 mt-2">
                 {/* Data */}
                 <div className="flex items-center gap-1.5">
                     <Calendar size={14} />
@@ -45,12 +49,6 @@ export const TaskItem = ({ task }) => {
                     <span>{task.priority}</span>
                 </div>
                 {/* ROI (Desabilitado) */}
-                {/*
-                <div className="flex items-center gap-1.5">
-                    <Info size={14} />
-                    <span>{task.roiId ? `ROI-${task.roiId}` : 'Sem ROI'}</span>
-                </div>
-                */}
             </div>
         </div>
     );
