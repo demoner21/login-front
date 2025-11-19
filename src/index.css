@@ -99,45 +99,85 @@
 
 /* Container principal mobile */
 .leaflet-pm-toolbar.mobile-collapsible {
-    position: relative !important;
+    position: absolute !important; /* Alterado para absolute */
+    top: 20px !important; /* Ajuste de posição */
+    right: 20px !important; /* Ajuste de posição */
+    z-index: 1000 !important;
     transition: all 0.3s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
 }
 
-/* Botão menu principal (sempre visível) */
-.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-main {
+/* Botão de toggle (sempre visível em mobile) */
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     width: 44px !important;
     height: 44px !important;
-    background: #4A4A4A !important;
+    background: #3b82f6 !important; /* Cor de destaque */
     border-radius: 12px !important;
-    z-index: 1000 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    z-index: 1001 !important; /* Acima dos outros botões */
 }
 
-/* Botões secundários (hidden por padrão) */
-.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-secondary {
-    display: none !important;
+/* Ícone do botão de toggle (hamburger) */
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle .control-icon {
+    width: 20px !important;
+    height: 20px !important;
+    position: relative !important;
+    filter: invert(0) brightness(10) !important; /* Ícone branco */
+}
+
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle .control-icon::before,
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle .control-icon::after {
+    content: '' !important;
     position: absolute !important;
+    width: 100% !important;
+    height: 2px !important;
+    background: white !important;
     left: 0 !important;
-    background: #4A4A4A !important;
-    border-radius: 12px !important;
-    overflow: hidden !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-    z-index: 999 !important;
-    flex-direction: column !important;
+    transition: all 0.3s ease !important;
+}
+
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle .control-icon::before {
+    top: 25% !important;
+}
+
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle .control-icon::after {
+    top: 75% !important;
+}
+
+/* Animação do ícone hamburger quando expandido */
+.leaflet-pm-toolbar.mobile-collapsible.expanded .leaflet-pm-btn-toggle .control-icon::before {
+    transform: rotate(45deg) !important;
+    top: 50% !important;
+}
+
+.leaflet-pm-toolbar.mobile-collapsible.expanded .leaflet-pm-btn-toggle .control-icon::after {
+    transform: rotate(-45deg) !important;
+    top: 50% !important;
+}
+
+/* Botões secundários (hidden por padrão em mobile) */
+.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-button:not(.leaflet-pm-btn-toggle) {
+    display: none !important;
 }
 
 /* Quando expandido - mostra botões secundários */
-.leaflet-pm-toolbar.mobile-collapsible.expanded .leaflet-pm-btn-secondary {
+.leaflet-pm-toolbar.mobile-collapsible.expanded .leaflet-pm-button:not(.leaflet-pm-btn-toggle) {
     display: flex !important;
-    animation: slideDown 0.3s ease !important;
-}
-
-/* Posiciona os botões secundários abaixo do principal */
-.leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-secondary {
-    top: 100% !important;
-    margin-top: 8px !important;
+    margin-top: 8px; /* Espaçamento entre os botões */
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(1.9px);
+    -webkit-backdrop-filter: blur(1.9px);
+    border: 1px solid rgba(255, 255, 255, 0.29);
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
 }
 
 /* Animação de expansão */
@@ -153,46 +193,39 @@
     }
 }
 
-/* Ícone do botão menu (hamburger) */
-.leaflet-pm-toolbar.mobile-collapsible .menu-icon {
-    width: 20px !important;
-    height: 20px !important;
-    position: relative !important;
-}
-
-.leaflet-pm-toolbar.mobile-collapsible .menu-icon::before,
-.leaflet-pm-toolbar.mobile-collapsible .menu-icon::after {
-    content: '' !important;
-    position: absolute !important;
-    width: 100% !important;
-    height: 2px !important;
-    background: white !important;
-    left: 0 !important;
-    transition: all 0.3s ease !important;
-}
-
-.leaflet-pm-toolbar.mobile-collapsible .menu-icon::before {
-    top: 25% !important;
-}
-
-.leaflet-pm-toolbar.mobile-collapsible .menu-icon::after {
-    top: 75% !important;
-}
-
-/* Animação do ícone hamburger quando expandido */
-.leaflet-pm-toolbar.mobile-collapsible.expanded .menu-icon::before {
-    transform: rotate(45deg) !important;
-    top: 50% !important;
-}
-
-.leaflet-pm-toolbar.mobile-collapsible.expanded .menu-icon::after {
-    transform: rotate(-45deg) !important;
-    top: 50% !important;
-}
-
 /*
  * 7. Media Queries para Mobile
  */
+
+/* Desktop - Esconde o botão de toggle e mostra a toolbar normal */
+@media (min-width: 769px) {
+    .leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-btn-toggle {
+        display: none !important;
+    }
+
+    .leaflet-pm-toolbar.mobile-collapsible .leaflet-pm-button:not(.leaflet-pm-btn-toggle) {
+        display: flex !important; /* Mostra todos os botões em desktop */
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        margin-top: 0; /* Remove espaçamento */
+    }
+
+    .leaflet-pm-toolbar.mobile-collapsible {
+        flex-direction: row !important; /* Volta para layout horizontal */
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(1.9px);
+        -webkit-backdrop-filter: blur(1.9px);
+        border: 1px solid rgba(255, 255, 255, 0.29);
+    }
+}
 
 /* Tablets e dispositivos menores */
 @media (max-width: 768px) {
@@ -260,4 +293,24 @@
 
 .leaflet-pm-actions-container a .control-icon {
     margin-right: 8px !important;
+}
+
+/* Ajuste para o posicionamento do Geoman toolbar */
+.leaflet-top.leaflet-right {
+    top: 20px;
+    right: 20px;
+}
+
+.leaflet-control-container .leaflet-pm-toolbar.leaflet-bar.leaflet-control {
+    background: none;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+@media (max-width: 768px) {
+    .leaflet-pm-toolbar {
+        display: none !important;
+    }
 }
