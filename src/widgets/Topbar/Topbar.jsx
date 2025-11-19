@@ -1,17 +1,61 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Search, Bell, Settings } from 'lucide-react';
+import shp from 'shpjs';
+import { useMap } from '@/context/MapContext';
+import UploadIcon from '@/shared/ui/icons/UploadIcon';
 
 export const Topbar = () => {
+    const location = useLocation();
+    const { setGeojson } = useMap();
+    const isMapPage = location.pathname.includes('/farm-map');
+
+    const handleFileChange = useCallback(async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const arrayBuffer = e.target.result;
+                const geojson = await shp.parseZip(arrayBuffer);
+                setGeojson(geojson);
+            } catch (error) {
+                console.error("Error parsing shapefile:", error);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+        // Reset input value to allow uploading the same file again
+        event.target.value = null; 
+    }, [setGeojson]);
+
     return (
-        <header className="flex h-16 flex-shrink-0 items-center justify-between border-gray-200 bg-white px-6">
+        <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-6">
 
             <div className="flex items-center">
-                {/* 3. Botão de Menu REMOVIDO */}
                 <h1 className="text-xl font-semibold text-gray-900">Farm Map</h1>
             </div>
 
-            {/* Seção de Pesquisa e Ações (sem mudanças) */}
             <div className="flex items-center space-x-6">
+                {isMapPage && (
+                    <>
+                        <label 
+                            htmlFor="shapefile-upload-topbar" 
+                            className="cursor-pointer text-gray-500 hover:text-gray-700"
+                            title="Carregar Shapefile (.zip)"
+                        >
+                            <UploadIcon className="h-6 w-6" />
+                        </label>
+                        <input
+                            id="shapefile-upload-topbar"
+                            type="file"
+                            accept=".zip"
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+                    </>
+                )}
+
                 <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                         <Search className="h-5 w-5 text-gray-400" />
@@ -31,7 +75,7 @@ export const Topbar = () => {
                 </button>
                 <button className="h-9 w-9 overflow-hidden rounded-full">
                     <img
-                        src="https://via.placeholder.com/150" // Placeholder para avatar
+                        src="https://via.placeholder.com/150"
                         alt="User avatar"
                         className="h-full w-full object-cover"
                     />
