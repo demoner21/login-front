@@ -12,26 +12,29 @@ export const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log('Login attempt:', { email, password, rememberMe });
+        setError('');
 
-        setTimeout(() => {
-            console.log('Login bem-sucedido (simulado)! Redirecionando...');
-            login();
-            setIsLoading(false);
+        const result = await login(email, password);
+        
+        if (result.success) {
             navigate('/dashboard');
-        }, 1500);
+        } else {
+            setError(result.error);
+        }
+        
+        setIsLoading(false);
     };
 
     return (
         <>
-            {/* Logo dentro do card */}
             <div className="mb-8">
                 <LogoPlaceholder />
             </div>
@@ -39,7 +42,13 @@ export const LoginForm = () => {
                 Bem-vindo! Faça seu login
             </h2>
 
-            {/* Formulário */}
+            {/* Mensagem de erro */}
+            {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
+
             <form onSubmit={handleSubmit}>
                 <Input
                     id="email"
@@ -65,7 +74,6 @@ export const LoginForm = () => {
                         className="w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900"
                         required
                     />
-                    {/* Botão de ver senha */}
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -76,7 +84,6 @@ export const LoginForm = () => {
                     </button>
                 </div>
 
-                {/* Opções (Lembrar-me / Esqueci senha) */}
                 <div className="flex justify-between items-center text-sm mb-8">
                     <div className="flex items-center">
                         <input
@@ -96,7 +103,6 @@ export const LoginForm = () => {
                     </Link>
                 </div>
 
-                {/* 2. Botão Entrar agora usa o componente <Button> */}
                 <Button
                     type="submit"
                     disabled={isLoading}
@@ -104,7 +110,6 @@ export const LoginForm = () => {
                     {isLoading ? 'Entrando...' : 'Entrar'}
                 </Button>
 
-                {/* Link de Cadastro */}
                 <p className="text-center text-sm text-gray-600 mt-8">
                     Não tenho conta?{' '}
                     <Link to="/register"
@@ -114,7 +119,6 @@ export const LoginForm = () => {
                 </p>
             </form>
 
-            {/* Footer */}
             <footer className="text-center text-xs text-gray-500 mt-12 pt-4 border-t border-gray-200">
                 <p>AK - Demoner | todos direitos reservados</p>
             </footer>
