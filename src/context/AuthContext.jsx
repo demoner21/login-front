@@ -1,53 +1,95 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '/home/demoner/alpha-earth/login-front/src/service/api.js';
 
-// 1. Criar o Contexto
 const AuthContext = createContext(null);
 
-// 2. Criar o Provedor (Provider)
 export const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-    // Função de login (simulada)
-    // No mundo real, você receberia um token aqui
-    const login = () => {
-        // Lógica de simulação:
-        // 1. Define o estado como autenticado
-        setIsAuthenticated(true);
+  // Verificar autenticação ao carregar
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-        // 2. (Opcional) No mundo real, você salvaria o token no localStorage
-        // localStorage.setItem('authToken', 'meu-token-falso');
-    };
+  const checkAuth = () => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsAuthenticated(true);
+      // Aqui você poderia fazer uma requisição para validar o token
+      // ou decodificar o JWT para obter informações do usuário
+    }
+    setLoading(false);
+  };
 
-    // Função de logout (simulada)
-    const logout = () => {
-        // Lógica de simulação:
-        // 1. Define o estado como não autenticado
-        setIsAuthenticated(false);
+  const login = async (email, password) => {
+    try {
+      const response = await authAPI.login(email, password);
+      const { data } = response.data;
+      
+      // Salvar tokens
+      localStorage.setItem('authToken', data.access_token);
+      localStorage.setItem('refreshToken', data.refresh_token);
+      
+      // Atualizar estado
+      setIsAuthenticated(true);
+      setUser(data.user);
+      
+      return { success: true, data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Erro ao fazer login' 
+      };
+    }
+  };
 
-        // 2. (Opcional) Remove o token
-        // localStorage.removeItem('authToken');
+  const register = async (userData) => {
+    try {
+      const response = await usersAPI.create(userData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Erro ao criar conta' 
+      };
+    }
+  };
 
-        // 3. Redireciona para a página de login
-        navigate('/login');
-    };
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Erro no logout:', error);
+    } finally {
+      // Limpar localStorage independente do sucesso da requisição
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      setIsAuthenticated(false);
+      setUser(null);
+      navigate('/login');
+    }
+  };
 
-    // 3. O valor que será compartilhado com os componentes filhos
-    const value = {
-        isAuthenticated,
-        login,
-        logout,
-    };
+  const value = {
+    isAuthenticated,
+    user,
+    loading,
+    login,
+    register,
+    logout,
+  };
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// 4. Hook customizado para facilitar o uso do contexto
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  }
+  return context;
 };
