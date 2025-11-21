@@ -10,6 +10,7 @@ export const RegisterForm = () => {
         name: '',
         email: '',
         password: '',
+        role_id: 2
     });
     const [showPassword, setShowPassword] = useState(false);
     const [agreeTerms, setAgreeTerms] = useState(false);

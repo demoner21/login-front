@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '/home/demoner/alpha-earth/login-front/src/service/api.js';
+import { authAPI, usersAPI } from '@/service/api';
 
 const AuthContext = createContext(null);
 
