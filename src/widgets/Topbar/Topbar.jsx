@@ -145,7 +145,7 @@ export const Topbar = () => {
                                 className="h-8 w-8 lg:h-9 lg:w-9 overflow-hidden rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
                                 <img
-                                    src="https://via.placeholder.com/150"
+                                    src={user?.avatar_url}
                                     alt="User avatar"
                                     className="h-full w-full object-cover"
                                 />
