@@ -20,12 +20,7 @@ const MainLayout = () => {
                 />
                 <div className="flex flex-1 flex-col overflow-hidden">
                     <Topbar />
-
-                    {/* MUDANÇA AQUI: 
-                    Removemos 'p-6' e 'rounded-tl-2xl' do <main>.
-                    Isso permite que o conteúdo da página preencha 100% da área.
-                    */}
-                    <main className="flex-1 overflow-y-auto bg-gray-50">
+                        <main className="h-full w-full overflow-y-auto bg-gray-50 rounded-4xl shadow-inner">
                         <Outlet />
                     </main>
                 </div>

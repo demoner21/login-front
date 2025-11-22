@@ -3,11 +3,11 @@ import { MapContainer, TileLayer, ZoomControl, useMap } from 'react-leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 
+// ... (Mantenha o componente GeomanControl exatamente como está) ...
 const GeomanControl = () => {
+    // ... código do GeomanControl mantido ...
     const map = useMap();
-
     useEffect(() => {
-        // Adiciona os controles do Geoman
         map.pm.addControls({
             position: 'topright',
             drawMarker: false,
@@ -18,26 +18,18 @@ const GeomanControl = () => {
             drawPolygon: true,
             drawText: false,
         });
-
-        // Event listener para quando um polígono é criado
         map.on('pm:create', (e) => {
             const { layer, shape } = e;
-            
             if (shape === 'Polygon' || shape === 'Rectangle') {
                 const latlngs = layer.getLatLngs();
                 console.log('Forma criada:', shape, latlngs);
-                
-                // Você pode salvar no estado aqui
             }
         });
-
-        // Cleanup
         return () => {
             map.pm.removeControls();
             map.off('pm:create');
         };
     }, [map]);
-
     return null;
 };
 
@@ -47,8 +39,16 @@ const FarmMapPage = () => {
     const [polygons, setPolygons] = useState([]);
 
     return (
-        <div className="p-2 h-full w-full flex flex-col">
-            <div className="w-full flex-1 rounded-4xl overflow-hidden">
+        /* ALTERAÇÃO 1: Removido 'p-2' da div principal.
+           Agora ela apenas preenche a altura e largura do container pai (MainLayout).
+        */
+        <div className="h-full w-full flex flex-col">
+            
+            {/* ALTERAÇÃO 2: Removido 'rounded-4xl' daqui.
+               O arredondamento agora é feito pelo MainLayout, que corta (overflow-hidden) 
+               o que estiver dentro dele.
+            */}
+            <div className="w-full flex-1 overflow-hidden">
                 <MapContainer
                     center={position}
                     zoom={13}
