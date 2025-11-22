@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authAPI, usersAPI } from '@/service/api';
+import api, { authAPI, usersAPI } from '../service/api';
 
 const AuthContext = createContext(null);
 
@@ -10,31 +10,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Verificar autenticação ao carregar
   useEffect(() => {
-    checkAuth();
+    verifySession();
   }, []);
 
-  const checkAuth = () => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsAuthenticated(true);
-      // Aqui você poderia fazer uma requisição para validar o token
-      // ou decodificar o JWT para obter informações do usuário
+  const verifySession = async () => {
+    try {
+      const response = await authAPI.refreshToken();
+
+      const { data } = response.data;
+
+      if (data && data.access_token) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+        
+        setUser(data.user);
+        setIsAuthenticated(true);
+      } else {
+        throw new Error('Token não recebido');
+      }
+
+    } catch (error) {
+
+      setIsAuthenticated(false);
+      setUser(null);
+      delete api.defaults.headers.common['Authorization'];
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
       const { data } = response.data;
+
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
       
-      // Salvar tokens
-      localStorage.setItem('authToken', data.access_token);
-      localStorage.setItem('refreshToken', data.refresh_token);
-      
-      // Atualizar estado
       setIsAuthenticated(true);
       setUser(data.user);
       
@@ -65,9 +76,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Erro no logout:', error);
     } finally {
-      // Limpar localStorage independente do sucesso da requisição
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
+      delete api.defaults.headers.common['Authorization'];
       setIsAuthenticated(false);
       setUser(null);
       navigate('/login');

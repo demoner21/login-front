@@ -44,8 +44,6 @@ export const RegisterForm = () => {
         setIsLoading(true);
         setError('');
 
-        console.log('📤 Dados para registro:', formData);
-
         try {
             const result = await register(formData);
             console.log('📥 Resultado do registro:', result);
