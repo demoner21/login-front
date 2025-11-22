@@ -13,8 +13,6 @@ export const Topbar = () => {
     const { logout, user } = useAuth();
     
     const isMapPage = location.pathname.includes('/farm-map');
-    
-    // Estado controla a visibilidade da busca em TODAS as resoluções
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     
@@ -67,12 +65,9 @@ export const Topbar = () => {
 
     return (
         /*<header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6 transition-all duration-200 relative z-20">*/
-        <header className="flex h-16 flex-shrink-0 items-center justify-between bg-white px-4 lg:px-6 transition-all duration-200 relative z-20">
-            {/* MODO 1: BUSCA EXPANDIDA (Ativo em Mobile e Desktop quando clicado)
-            */}
+        <header className="flex h-16 flex-shrink-0 items-center justify-between bg-white px-4 lg:px-6 transition-all duration-200 relative z-[1100]">
             {isSearchOpen ? (
                 <div className="flex w-full items-center gap-2 animate-in fade-in duration-200 justify-center">
-                    {/* Wrapper para limitar a largura em telas grandes */}
                     <div className="relative flex-1 md:flex-none md:w-80">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                             <Search className="h-5 w-5 text-gray-400" />
@@ -94,8 +89,6 @@ export const Topbar = () => {
                     </button>
                 </div>
             ) : (
-                /* MODO 2: BARRA NORMAL (Logo + Ícones) 
-                */
                 <>
                     <div className="flex items-center min-w-0">
                         <h1 className="text-lg lg:text-xl font-semibold text-gray-900 truncate">
@@ -137,8 +130,6 @@ export const Topbar = () => {
                         >
                             <Bell className="h-5 w-5 lg:h-6 lg:w-6" />
                         </button>
-                        
-                        {/* Profile Dropdown */}
                         <div className="relative" ref={profileMenuRef}>
                             <button 
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
