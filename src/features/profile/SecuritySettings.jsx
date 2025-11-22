@@ -1,53 +1,18 @@
 import React, { useState } from 'react';
-import { AlertCircle, CheckCircle, Eye, EyeOff, Trash2, AlertTriangle, Shield } from 'lucide-react';
+import { AlertCircle, CheckCircle, Trash2, AlertTriangle, Shield } from 'lucide-react';
 import { Button } from '../../shared/ui/Button';
 import { Modal } from '../../shared/ui/Modal';
 import { usersAPI } from '../../service/api';
 import { useAuth } from '../../context/AuthContext';
-
-// --- Subcomponente Ajustado: Estilo Login/Register (Underline) ---
-const PasswordInput = ({ id, label, value, onChange, placeholder, required = false }) => {
-    const [showPassword, setShowPassword] = useState(false);
-
-    return (
-        <div className="mb-6">
-            <label htmlFor={id} className="block text-sm font-medium text-gray-600 mb-1">
-                {label}
-            </label>
-            <div className="relative">
-                <input
-                    type={showPassword ? 'text' : 'password'}
-                    id={id}
-                    value={value}
-                    onChange={onChange}
-                    required={required}
-                    placeholder={placeholder}
-                    // MUDANÇA: Estilo idêntico ao src/shared/ui/Input.jsx e LoginForm
-                    className="w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900 placeholder-gray-400 transition-colors pr-8"
-                />
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    // Ajuste de posição para alinhar com o estilo underline
-                    className="absolute right-1 top-2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-            </div>
-        </div>
-    );
-};
+import { PasswordInput } from '../../shared/ui/PasswordInput';
 
 export const SecuritySettings = () => {
     const { user, logout } = useAuth();
-    
     const [passwords, setPasswords] = useState({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
     });
-    
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -70,7 +35,6 @@ export const SecuritySettings = () => {
         }
 
         setIsLoading(true);
-
         try {
             const payload = {
                 current_password: passwords.currentPassword,
@@ -94,7 +58,7 @@ export const SecuritySettings = () => {
         try {
             await usersAPI.delete(user.id);
             setIsDeleteModalOpen(false);
-            logout(); 
+            logout();
         } catch (error) {
             setStatus({ 
                 type: 'error', 
@@ -110,7 +74,6 @@ export const SecuritySettings = () => {
         <>
             <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 animate-in fade-in">
                 
-                {/* Cabeçalho mantido */}
                 <div className="p-6 border-b border-gray-100">
                     <div className="flex items-center gap-4">
                         <div className="p-2.5 bg-blue-50 rounded-lg hidden sm:block">
@@ -125,7 +88,6 @@ export const SecuritySettings = () => {
                     </div>
                 </div>
 
-                {/* Feedback Message mantido */}
                 {status.message && (
                     <div className="px-6 pt-6">
                         <div className={`p-3 rounded-lg flex items-center gap-3 ${
@@ -139,6 +101,7 @@ export const SecuritySettings = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="p-6 space-y-6">
+                        {/* Grid Senha Atual */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <PasswordInput
                                 id="currentPassword"
@@ -150,7 +113,6 @@ export const SecuritySettings = () => {
                             />
                         </div>
                         
-                        {/* Grid Nova Senha (igual ao de cima) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <PasswordInput
                                 id="newPassword"
@@ -170,8 +132,6 @@ export const SecuritySettings = () => {
                             />
                         </div>
                     </div>
-
-                    {/* Rodapé de Ações mantido */}
                     <div className="px-6 pb-6 pt-2">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-3">
                             
@@ -195,7 +155,6 @@ export const SecuritySettings = () => {
                 </form>
             </div>
 
-            {/* Modal mantido */}
             <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
                  <div className="text-center p-2">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
