@@ -20,7 +20,7 @@ const MainLayout = () => {
                 />
                 <div className="flex flex-1 flex-col overflow-hidden">
                     <Topbar />
-                        <main className="h-full w-full overflow-y-auto bg-gray-50 rounded-4xl shadow-inner">
+                        <main className="h-full w-full overflow-y-auto bg-gray-50 rounded-tl-2xl shadow-inner">
                         <Outlet />
                     </main>
                 </div>
