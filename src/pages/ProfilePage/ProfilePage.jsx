@@ -1,67 +1,80 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MapPin, Pencil, Save, X, Shield, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
+import { Pencil, Save, X, Shield, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react'; 
 import { useAuth } from '../../context/AuthContext';
 import { SecuritySettings } from '../../features/profile/SecuritySettings';
 
-// --- Subcomponente: Card de Seção (Estilo Original) ---
-const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children }) => {
+// --- Estilo Padronizado (Underline Style) ---
+const inputClassName = "w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900 placeholder-gray-400 transition-colors pr-8";
+
+// --- Componente Card Genérico ---
+const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children, hideHeader = false }) => {
     return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {title && (
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+            
+            {/* Lógica de Exibição do Header */}
+            {!hideHeader && (title || (onEdit && isEditing)) && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 sm:gap-0">
+                    
+                    {/* Título */}
+                    {title && <h3 className="text-lg font-bold text-gray-900">{title}</h3>}
+                    
+                    {/* Botões de Ação */}
                     {onEdit && (
-                        <div>
+                        <div className="flex items-center gap-2 sm:ml-auto self-start sm:self-auto">
                             {isEditing ? (
-                                <div className="flex gap-2">
+                                <>
                                     <button 
                                         onClick={onCancel}
-                                        className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all"
                                     >
-                                        <X size={16} /> Cancelar
+                                        <X size={16} /> <span>Cancelar</span>
                                     </button>
                                     <button 
                                         onClick={onSave}
-                                        className="flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-blue-900 hover:bg-blue-800 rounded-lg transition-colors shadow-sm"
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800 transition-all shadow-sm"
                                     >
-                                        <Save size={16} /> Salvar
+                                        <Save size={16} /> <span>Salvar</span>
                                     </button>
-                                </div>
+                                </>
                             ) : (
                                 <button
                                     onClick={onEdit}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all"
                                 >
-                                    <Pencil size={16} /> Edit
+                                    <Pencil size={16} /> <span>Edit</span>
                                 </button>
                             )}
                         </div>
                     )}
                 </div>
             )}
-            {!title && onEdit && (
-                <div className="flex justify-end mb-4">
-                     {isEditing ? (
-                        <div className="flex gap-2">
-                            <button onClick={onCancel} className="text-sm text-gray-600 hover:bg-gray-100 px-3 py-1 rounded">Cancelar</button>
-                            <button onClick={onSave} className="text-sm bg-blue-900 text-white px-3 py-1 rounded">Salvar</button>
-                        </div>
-                     ) : (
-                        <button onClick={onEdit} className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-gray-50">
-                            <Pencil size={18} />
-                        </button>
-                     )}
-                 </div>
-            )}
+
             {children}
+
+            {/* Botões Flutuantes para o Header Personalizado */}
+            {hideHeader && isEditing && (
+                 <div className="flex flex-wrap justify-end gap-2 mt-6 pt-4 border-t border-gray-100">
+                    <button 
+                        onClick={onCancel}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all"
+                    >
+                        <X size={16} /> <span>Cancelar</span>
+                    </button>
+                    <button 
+                        onClick={onSave}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800 transition-all shadow-sm"
+                    >
+                        <Save size={16} /> <span>Salvar</span>
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
 
-// --- Subcomponente: Campo de Input/Texto (Estilo Original) ---
 const InfoField = ({ label, value, name, isEditing, onChange, type = "text", placeholder }) => (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full mb-4"> 
         <span className="text-sm font-medium text-gray-400 mb-1">{label}</span>
         {isEditing ? (
             <input
@@ -70,40 +83,34 @@ const InfoField = ({ label, value, name, isEditing, onChange, type = "text", pla
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-gray-900 transition-all"
+                className={inputClassName}
             />
         ) : (
-            <p className="text-gray-900 font-medium h-[42px] flex items-center">{value || '-'}</p>
+            <p className="text-gray-900 font-medium py-2 border-b border-transparent">{value || '-'}</p>
         )}
     </div>
 );
 
-// --- Página Principal ---
 const ProfilePage = () => {
     const { user, updateUserProfile, updateUserPhoto } = useAuth();
     const location = useLocation();
-    
-    // Referência para upload de foto
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
-
     const [activeTab, setActiveTab] = useState('my-profile');
     const [isSaving, setIsSaving] = useState(false);
 
-    // Estados de Edição
     const [editMode, setEditMode] = useState({
         header: false,
         personal: false,
         address: false
     });
 
-    // Dados do Formulário (Mapeamento Backend)
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
         job_title: '',
-        location: '',   
+        location: '',
         country: '',
         city: '',
         state: '',      
@@ -111,14 +118,14 @@ const ProfilePage = () => {
         tax_id: ''
     });
 
-    // Sincroniza abas
+    // Sincroniza activeTab com location.state
     useEffect(() => {
         if (location.state?.activeTab) {
             setActiveTab(location.state.activeTab);
         }
     }, [location.state]);
 
-    // Carrega dados do usuário
+    // Sincroniza formData com user
     useEffect(() => {
         if (user) {
             setFormData({
@@ -126,7 +133,7 @@ const ProfilePage = () => {
                 email: user.email || '',
                 phone: user.phone || '',
                 job_title: user.job_title || '',
-                location: user.location || '', 
+                location: user.location || '',
                 country: user.country || '',
                 city: user.city || '',
                 state: user.state || '',
@@ -136,7 +143,6 @@ const ProfilePage = () => {
         }
     }, [user]);
 
-    // Handlers
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -146,7 +152,6 @@ const ProfilePage = () => {
         setEditMode(prev => ({ ...prev, [section]: !prev[section] }));
     };
 
-    // --- Lógica de Foto ---
     const handleAvatarClick = () => {
         if (editMode.header) {
             fileInputRef.current.click();
@@ -166,7 +171,6 @@ const ProfilePage = () => {
         }
     };
 
-    // --- Lógica de Salvar ---
     const handleSave = async (section) => {
         setIsSaving(true);
         
@@ -187,7 +191,6 @@ const ProfilePage = () => {
         });
 
         const result = await updateUserProfile(payload);
-
         setIsSaving(false);
 
         if (result.success) {
@@ -216,95 +219,100 @@ const ProfilePage = () => {
                 <p className="text-gray-500 mt-1">Gerencie as configurações da sua conta</p>
             </div>
 
-            {/* ABA: MY PROFILE */}
             {activeTab === 'my-profile' && (
                 <div className="space-y-6">
                     
-                    {/* 1. Header Card */}
+                    {/* --- HEADER SECTION --- */}
                     <SectionCard 
                         title=""
+                        hideHeader={true}
                         isEditing={editMode.header}
                         onEdit={() => toggleEdit('header')}
                         onSave={() => handleSave('header')}
                         onCancel={() => toggleEdit('header')}
                     >
-                        <div className="flex flex-col sm:flex-row items-center gap-6">
-                             
-                             {/* Foto de Perfil */}
-                             <div className="relative">
-                                <div 
-                                    className={`relative rounded-full overflow-hidden w-24 h-24 border-4 border-gray-50 shadow-sm ${editMode.header ? 'cursor-pointer group' : ''}`}
-                                    onClick={handleAvatarClick}
-                                >
-                                    <img 
-                                        src={user?.avatar_url || "https://via.placeholder.com/150"} 
-                                        alt="Profile" 
-                                        className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : ''}`}
+                        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-6">
+                             <div className="flex flex-col sm:flex-row items-center gap-6 w-full">
+                                <div className="relative shrink-0">
+                                    <div 
+                                        className={`relative rounded-full overflow-hidden w-24 h-24 border-4 border-gray-50 shadow-sm ${editMode.header ? 'cursor-pointer group' : ''}`}
+                                        onClick={handleAvatarClick}
+                                    >
+                                        <img 
+                                            src={user?.avatar_url || "https://via.placeholder.com/150"} 
+                                            alt="Profile" 
+                                            className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : ''}`}
+                                        />
+                                        {isUploading && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                                <Loader2 className="w-8 h-8 text-white animate-spin" />
+                                            </div>
+                                        )}
+                                        {editMode.header && !isUploading && (
+                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Camera className="text-white w-8 h-8" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        onChange={handleFileChange} 
+                                        accept="image/*"
+                                        className="hidden" 
                                     />
-                                    {isUploading && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                            <Loader2 className="w-8 h-8 text-white animate-spin" />
-                                        </div>
-                                    )}
+
                                     {editMode.header && !isUploading && (
-                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Camera className="text-white w-8 h-8" />
+                                        <button 
+                                            onClick={handleAvatarClick}
+                                            className="absolute bottom-0 right-0 bg-blue-900 p-1.5 rounded-full text-white hover:bg-blue-800 shadow-md transition-transform hover:scale-110 z-10"
+                                        >
+                                            <Pencil size={14} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 text-center sm:text-left w-full sm:w-auto">
+                                    {editMode.header ? (
+                                        <div className="flex flex-col gap-4 w-full max-w-md mx-auto sm:mx-0 animate-in fade-in duration-300">
+                                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{formData.name}</h2>
+                                            <input 
+                                                name="job_title" 
+                                                value={formData.job_title} 
+                                                onChange={handleInputChange} 
+                                                placeholder="Product Designer" 
+                                                className={inputClassName} 
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-1">
+                                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                                                {formData.name}
+                                            </h2>
+                                            <p className="text-gray-500 font-medium">
+                                                {formData.job_title || 'Cargo não definido'}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
-                                
-                                <input 
-                                    type="file" 
-                                    ref={fileInputRef} 
-                                    onChange={handleFileChange} 
-                                    accept="image/*"
-                                    className="hidden" 
-                                />
+                            </div>
 
-                                {editMode.header && !isUploading && (
-                                    <button 
-                                        onClick={handleAvatarClick}
-                                        className="absolute bottom-0 right-0 bg-blue-900 p-1.5 rounded-full text-white hover:bg-blue-800 shadow-md transition-transform hover:scale-110"
+                            {!editMode.header && (
+                                <div className="w-full sm:w-auto flex justify-center sm:justify-end mt-2 sm:mt-0">
+                                    <button
+                                        onClick={() => toggleEdit('header')}
+                                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all whitespace-nowrap"
                                     >
-                                        <Pencil size={14} />
+                                        <Pencil size={16} /> 
+                                        <span>Edit</span>
                                     </button>
-                                )}
-                            </div>
-
-                            {/* Informações Básicas */}
-                            <div className="flex-1 text-center sm:text-left w-full">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                                    {formData.name}
-                                </h2>
-                                {editMode.header ? (
-                                    <div className="grid gap-3 max-w-md mt-2 mx-auto sm:mx-0">
-                                        <input 
-                                            name="job_title" 
-                                            value={formData.job_title} 
-                                            onChange={handleInputChange} 
-                                            placeholder="Cargo" 
-                                            className="p-2 bg-gray-50 border rounded" 
-                                        />
-                                        <input 
-                                            name="location" 
-                                            value={formData.location} 
-                                            onChange={handleInputChange} 
-                                            placeholder="Localização rápida" 
-                                            className="p-2 bg-gray-50 border rounded" 
-                                        />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <p className="text-gray-600 font-medium">{formData.job_title || 'Cargo não definido'}</p>
-                                        <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-1 mt-1">
-                                        </p>
-                                    </>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     </SectionCard>
 
-                    {/* 2. Personal Information (NOVO LAYOUT) */}
+                    {/* --- PERSONAL INFORMATION --- */}
                     <SectionCard 
                         title="Personal Information"
                         isEditing={editMode.personal}
@@ -312,10 +320,7 @@ const ProfilePage = () => {
                         onSave={() => handleSave('personal')}
                         onCancel={() => toggleEdit('personal')}
                     >
-                        {/* Grid de 2 colunas */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            
-                            {/* Nome ocupando 2 colunas (Largura total) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                             <div className="md:col-span-2">
                                 <InfoField 
                                     label="Full Name" 
@@ -326,7 +331,6 @@ const ProfilePage = () => {
                                 />
                             </div>
 
-                            {/* Email e Phone lado a lado */}
                             <InfoField 
                                 label="Email address" 
                                 name="email" 
@@ -346,7 +350,7 @@ const ProfilePage = () => {
                         </div>
                     </SectionCard>
 
-                    {/* 3. Address (Grid Padrão) */}
+                    {/* --- ADDRESS --- */}
                     <SectionCard 
                         title="Address"
                         isEditing={editMode.address}
@@ -354,26 +358,25 @@ const ProfilePage = () => {
                         onSave={() => handleSave('address')}
                         onCancel={() => toggleEdit('address')}
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                             <InfoField label="Country" name="country" value={formData.country} isEditing={editMode.address} onChange={handleInputChange} />
                             <InfoField label="State" name="state" value={formData.state} isEditing={editMode.address} onChange={handleInputChange} placeholder="Ex: SP" />
                             <InfoField label="City" name="city" value={formData.city} isEditing={editMode.address} onChange={handleInputChange} />
-                            <InfoField label="Street Address" name="location" value={formData.location} isEditing={editMode.address} onChange={handleInputChange} />
                             <InfoField label="Postal Code" name="postal_code" value={formData.postal_code} isEditing={editMode.address} onChange={handleInputChange} />
-                            <InfoField label="TAX ID" name="tax_id" value={formData.tax_id} isEditing={editMode.address} onChange={handleInputChange} />
+                            <div className="md:col-span-2">
+                                <InfoField label="TAX ID" name="tax_id" value={formData.tax_id} isEditing={editMode.address} onChange={handleInputChange} />
+                            </div>
                         </div>
                     </SectionCard>
                 </div>
             )}
 
-            {/* ABA: SECURITY */}
             {activeTab === 'security' && (
                 <div className="max-w-4xl">
                     <SecuritySettings />
                 </div>
             )}
 
-            {/* PLACEHOLDERS */}
             {activeTab !== 'my-profile' && activeTab !== 'security' && (
                 <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center animate-in fade-in duration-500">
                     <div className="inline-flex p-4 bg-blue-50 rounded-full mb-4">
@@ -383,7 +386,7 @@ const ProfilePage = () => {
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Módulo em Desenvolvimento</h3>
                     <p className="text-gray-500 max-w-md mx-auto">
-                       Esta seção está sendo desenvolvida.
+                        Esta seção está sendo desenvolvida.
                     </p>
                 </div>
             )}
