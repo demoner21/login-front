@@ -8,8 +8,10 @@ export const Input = ({
     onChange,
     required = false,
     placeholder = '',
-    autoComplete = '',
+    autoComplete = 'off',
 }) => {
+    const inputStyle = "w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900 placeholder-gray-400 transition-colors";
+
     return (
         <div className="mb-6">
             <label
@@ -26,7 +28,7 @@ export const Input = ({
                 required={required}
                 placeholder={placeholder}
                 autoComplete={autoComplete}
-                className="w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900"
+                className={inputStyle}
             />
         </div>
     );
