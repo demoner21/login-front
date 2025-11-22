@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { HomePage } from "@/pages/HomePage/HomePage.jsx";
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
@@ -8,6 +9,7 @@ import MainLayout from './layouts/MainLayout';
 import FarmMapPage from './pages/FarmMapPage/FarmMapPage'
 import TaskPage from './pages/TaskPage/TaskPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
+import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
 
 const CropsPage = () => <div className="text-2xl font-bold">Página Crops</div>;
 const ReportsPage = () => <div className="text-2xl font-bold">Página Reports</div>;
@@ -15,6 +17,8 @@ const ReportsPage = () => <div className="text-2xl font-bold">Página Reports</d
 function App() {
 
   return (
+    <>
+    <Toaster position="top-right" richColors />
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -29,11 +33,13 @@ function App() {
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/tasks" element={<TaskPage />} />
+          <Route path="*" element={<NotFoundPage />} />
 
         </Route>
       </Route>
 
     </Routes>
+    </>
   );
 }
 
