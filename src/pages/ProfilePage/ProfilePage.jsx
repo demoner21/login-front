@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { User, MapPin, Mail, Phone, Pencil, Save, X, Shield, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
+import { MapPin, Pencil, Save, X, Shield, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { SecuritySettings } from '../../features/profile/SecuritySettings';
 
-// --- Subcomponente: Card de Seção (Estilo Original Mantido) ---
+// --- Subcomponente: Card de Seção (Estilo Original) ---
 const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children }) => {
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -42,14 +42,13 @@ const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children }) =
             )}
             {!title && onEdit && (
                 <div className="flex justify-end mb-4">
-                     {/* Caso especial para o Header que não tem título visível */}
                      {isEditing ? (
                         <div className="flex gap-2">
                             <button onClick={onCancel} className="text-sm text-gray-600 hover:bg-gray-100 px-3 py-1 rounded">Cancelar</button>
                             <button onClick={onSave} className="text-sm bg-blue-900 text-white px-3 py-1 rounded">Salvar</button>
                         </div>
                      ) : (
-                        <button onClick={onEdit} className="text-gray-400 hover:text-blue-600 transition-colors">
+                        <button onClick={onEdit} className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-gray-50">
                             <Pencil size={18} />
                         </button>
                      )}
@@ -60,7 +59,7 @@ const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children }) =
     );
 };
 
-// --- Subcomponente: Campo de Input/Texto (Estilo Original Mantido) ---
+// --- Subcomponente: Campo de Input/Texto (Estilo Original) ---
 const InfoField = ({ label, value, name, isEditing, onChange, type = "text", placeholder }) => (
     <div className="flex flex-col w-full">
         <span className="text-sm font-medium text-gray-400 mb-1">{label}</span>
@@ -71,11 +70,9 @@ const InfoField = ({ label, value, name, isEditing, onChange, type = "text", pla
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                // Estilo Original: bg-gray-50, border-gray-200
                 className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-gray-900 transition-all"
             />
         ) : (
-            // Estilo Original: Altura fixa para manter alinhamento
             <p className="text-gray-900 font-medium h-[42px] flex items-center">{value || '-'}</p>
         )}
     </div>
@@ -86,7 +83,7 @@ const ProfilePage = () => {
     const { user, updateUserProfile, updateUserPhoto } = useAuth();
     const location = useLocation();
     
-    // Referências para upload
+    // Referência para upload de foto
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
 
@@ -121,7 +118,7 @@ const ProfilePage = () => {
         }
     }, [location.state]);
 
-    // Carrega dados do user
+    // Carrega dados do usuário
     useEffect(() => {
         if (user) {
             setFormData({
@@ -139,6 +136,7 @@ const ProfilePage = () => {
         }
     }, [user]);
 
+    // Handlers
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -168,22 +166,23 @@ const ProfilePage = () => {
         }
     };
 
-    // --- Lógica de Salvar (Payload Limpo) ---
+    // --- Lógica de Salvar ---
     const handleSave = async (section) => {
         setIsSaving(true);
         
         const sectionFields = {
-            header: ['name', 'job_title', 'location', 'city'], 
+            header: ['name', 'job_title', 'city'], 
             personal: ['name', 'email', 'phone'],
-            address: ['country', 'city', 'state', 'location', 'postal_code', 'tax_id']
+            address: ['country', 'city', 'state', 'postal_code', 'tax_id']
         };
 
         const fieldsToUpdate = sectionFields[section] || [];
         const payload = {};
         
         fieldsToUpdate.forEach(field => {
-            if (formData[field] !== undefined) {
-                payload[field] = formData[field];
+            const value = formData[field];
+            if (value !== undefined && value !== null) { 
+                payload[field] = value;
             }
         });
 
@@ -221,7 +220,7 @@ const ProfilePage = () => {
             {activeTab === 'my-profile' && (
                 <div className="space-y-6">
                     
-                    {/* 1. Header Card (Visual Original) */}
+                    {/* 1. Header Card */}
                     <SectionCard 
                         title=""
                         isEditing={editMode.header}
@@ -230,26 +229,26 @@ const ProfilePage = () => {
                         onCancel={() => toggleEdit('header')}
                     >
                         <div className="flex flex-col sm:flex-row items-center gap-6">
+                             
+                             {/* Foto de Perfil */}
                              <div className="relative">
-                                {/* Container da Imagem */}
                                 <div 
-                                    className={`relative rounded-full overflow-hidden w-24 h-24 border-4 border-gray-50 shadow-sm ${editMode.header ? 'cursor-pointer' : ''}`}
+                                    className={`relative rounded-full overflow-hidden w-24 h-24 border-4 border-gray-50 shadow-sm ${editMode.header ? 'cursor-pointer group' : ''}`}
                                     onClick={handleAvatarClick}
                                 >
                                     <img 
                                         src={user?.avatar_url || "https://via.placeholder.com/150"} 
                                         alt="Profile" 
-                                        className={`w-full h-full object-cover ${isUploading ? 'opacity-50' : ''}`}
+                                        className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : ''}`}
                                     />
                                     {isUploading && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                                             <Loader2 className="w-8 h-8 text-white animate-spin" />
                                         </div>
                                     )}
-                                    {/* Overlay apenas se estiver editando */}
                                     {editMode.header && !isUploading && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                            <Camera className="text-white w-6 h-6" />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Camera className="text-white w-8 h-8" />
                                         </div>
                                     )}
                                 </div>
@@ -272,6 +271,7 @@ const ProfilePage = () => {
                                 )}
                             </div>
 
+                            {/* Informações Básicas */}
                             <div className="flex-1 text-center sm:text-left w-full">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-1">
                                     {formData.name}
@@ -297,7 +297,6 @@ const ProfilePage = () => {
                                     <>
                                         <p className="text-gray-600 font-medium">{formData.job_title || 'Cargo não definido'}</p>
                                         <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-1 mt-1">
-                                            <MapPin size={14} /> {[formData.city, formData.state].filter(Boolean).join(', ') || 'Localização não definida'}
                                         </p>
                                     </>
                                 )}
@@ -305,7 +304,7 @@ const ProfilePage = () => {
                         </div>
                     </SectionCard>
 
-                    {/* 2. Personal Information (Layout Ajustado: Nome em cima, Email/Tel embaixo) */}
+                    {/* 2. Personal Information (NOVO LAYOUT) */}
                     <SectionCard 
                         title="Personal Information"
                         isEditing={editMode.personal}
@@ -313,11 +312,13 @@ const ProfilePage = () => {
                         onSave={() => handleSave('personal')}
                         onCancel={() => toggleEdit('personal')}
                     >
+                        {/* Grid de 2 colunas */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            {/* Nome ocupando a linha inteira (2 colunas) */}
+                            
+                            {/* Nome ocupando 2 colunas (Largura total) */}
                             <div className="md:col-span-2">
                                 <InfoField 
-                                    label="Name" 
+                                    label="Full Name" 
                                     name="name" 
                                     value={formData.name} 
                                     isEditing={editMode.personal} 
@@ -325,7 +326,7 @@ const ProfilePage = () => {
                                 />
                             </div>
 
-                            {/* Email e Telefone na linha de baixo */}
+                            {/* Email e Phone lado a lado */}
                             <InfoField 
                                 label="Email address" 
                                 name="email" 
@@ -345,7 +346,7 @@ const ProfilePage = () => {
                         </div>
                     </SectionCard>
 
-                    {/* 3. Address (Estilo Original) */}
+                    {/* 3. Address (Grid Padrão) */}
                     <SectionCard 
                         title="Address"
                         isEditing={editMode.address}
@@ -372,7 +373,7 @@ const ProfilePage = () => {
                 </div>
             )}
 
-            {/* PLACEHOLDERS PARA OUTRAS ABAS */}
+            {/* PLACEHOLDERS */}
             {activeTab !== 'my-profile' && activeTab !== 'security' && (
                 <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center animate-in fade-in duration-500">
                     <div className="inline-flex p-4 bg-blue-50 rounded-full mb-4">
@@ -380,7 +381,7 @@ const ProfilePage = () => {
                         {activeTab === 'notifications' && <Bell className="w-8 h-8 text-blue-600" />}
                         {activeTab === 'billing' && <CreditCard className="w-8 h-8 text-blue-600" />}
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Módulo {getPageTitle()}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Módulo em Desenvolvimento</h3>
                     <p className="text-gray-500 max-w-md mx-auto">
                        Esta seção está sendo desenvolvida.
                     </p>
