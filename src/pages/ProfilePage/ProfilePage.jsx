@@ -1,25 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Pencil, Save, X, Shield, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react'; 
+import { Pencil, Save, X, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { SecuritySettings } from '../../features/profile/SecuritySettings';
 
-// --- Estilo Padronizado (Underline Style) ---
-const inputClassName = "w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900 placeholder-gray-400 transition-colors pr-8";
+// Importamos o componente centralizado
+import { Input } from '../../shared/ui/Input';
 
-// --- Componente Card Genérico ---
+// --- Componente Card Genérico (Mantido igual) ---
 const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children, hideHeader = false }) => {
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
             
-            {/* Lógica de Exibição do Header */}
             {!hideHeader && (title || (onEdit && isEditing)) && (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 sm:gap-0">
-                    
-                    {/* Título */}
                     {title && <h3 className="text-lg font-bold text-gray-900">{title}</h3>}
                     
-                    {/* Botões de Ação */}
                     {onEdit && (
                         <div className="flex items-center gap-2 sm:ml-auto self-start sm:self-auto">
                             {isEditing ? (
@@ -52,7 +48,6 @@ const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children, hid
 
             {children}
 
-            {/* Botões Flutuantes para o Header Personalizado */}
             {hideHeader && isEditing && (
                  <div className="flex flex-wrap justify-end gap-2 mt-6 pt-4 border-t border-gray-100">
                     <button 
@@ -73,23 +68,31 @@ const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children, hid
     );
 };
 
-const InfoField = ({ label, value, name, isEditing, onChange, type = "text", placeholder }) => (
-    <div className="flex flex-col w-full mb-4"> 
-        <span className="text-sm font-medium text-gray-400 mb-1">{label}</span>
-        {isEditing ? (
-            <input
+// --- InfoField Refatorado ---
+// Agora ele usa o componente <Input /> quando está em modo de edição
+const InfoField = ({ label, value, name, isEditing, onChange, type = "text", placeholder }) => {
+    if (isEditing) {
+        return (
+            <Input 
+                id={name} 
+                label={label} 
+                value={value} 
+                onChange={onChange} 
                 type={type}
-                name={name}
-                value={value}
-                onChange={onChange}
                 placeholder={placeholder}
-                className={inputClassName}
             />
-        ) : (
-            <p className="text-gray-900 font-medium py-2 border-b border-transparent">{value || '-'}</p>
-        )}
-    </div>
-);
+        );
+    }
+
+    return (
+        <div className="flex flex-col w-full mb-6"> 
+            <span className="block text-sm font-medium text-gray-600 mb-1">{label}</span>
+            <p className="text-gray-900 font-medium py-2 border-b border-transparent min-h-[40px] flex items-center">
+                {value || '-'}
+            </p>
+        </div>
+    );
+};
 
 const ProfilePage = () => {
     const { user, updateUserProfile, updateUserPhoto } = useAuth();
@@ -118,14 +121,12 @@ const ProfilePage = () => {
         tax_id: ''
     });
 
-    // Sincroniza activeTab com location.state
     useEffect(() => {
         if (location.state?.activeTab) {
             setActiveTab(location.state.activeTab);
         }
     }, [location.state]);
 
-    // Sincroniza formData com user
     useEffect(() => {
         if (user) {
             setFormData({
@@ -144,8 +145,10 @@ const ProfilePage = () => {
     }, [user]);
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        // MUDANÇA IMPORTANTE: Usamos 'id' para identificar o campo, 
+        // alinhando com o comportamento do RegisterForm e do componente Input
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
     };
 
     const toggleEdit = (section) => {
@@ -165,7 +168,6 @@ const ProfilePage = () => {
         setIsUploading(true);
         const result = await updateUserPhoto(file);
         setIsUploading(false);
-
         if (!result.success) {
             alert(result.error);
         }
@@ -173,16 +175,13 @@ const ProfilePage = () => {
 
     const handleSave = async (section) => {
         setIsSaving(true);
-        
         const sectionFields = {
             header: ['name', 'job_title', 'city'], 
             personal: ['name', 'email', 'phone'],
             address: ['country', 'city', 'state', 'postal_code', 'tax_id']
         };
-
         const fieldsToUpdate = sectionFields[section] || [];
         const payload = {};
-        
         fieldsToUpdate.forEach(field => {
             const value = formData[field];
             if (value !== undefined && value !== null) { 
@@ -275,14 +274,17 @@ const ProfilePage = () => {
 
                                 <div className="flex-1 text-center sm:text-left w-full sm:w-auto">
                                     {editMode.header ? (
-                                        <div className="flex flex-col gap-4 w-full max-w-md mx-auto sm:mx-0 animate-in fade-in duration-300">
-                                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{formData.name}</h2>
-                                            <input 
-                                                name="job_title" 
+                                        <div className="flex flex-col gap-0 w-full max-w-md mx-auto sm:mx-0 animate-in fade-in duration-300">
+                                            {/* Nome exibido estático no header, editável na seção abaixo */}
+                                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{formData.name}</h2>
+                                            
+                                            {/* Input estilizado para o Cargo */}
+                                            <Input 
+                                                id="job_title"
+                                                label="Cargo / Função"
                                                 value={formData.job_title} 
                                                 onChange={handleInputChange} 
                                                 placeholder="Product Designer" 
-                                                className={inputClassName} 
                                             />
                                         </div>
                                     ) : (
