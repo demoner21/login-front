@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoPlaceholder } from '../../shared/ui/LogoPlaceholder';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../shared/ui/Button';
+import { Input } from '../../shared/ui/Input';
+import { PasswordInput } from '../../shared/ui/PasswordInput';
 
 export const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -12,11 +14,10 @@ export const RegisterForm = () => {
         password: '',
         role_id: 2
     });
-    const [showPassword, setShowPassword] = useState(false);
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-
+    
     const navigate = useNavigate();
     const { register } = useAuth();
 
@@ -29,8 +30,7 @@ export const RegisterForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('🔐 INICIANDO REGISTRO...');
-
+        
         if (!agreeTerms) {
             setError('Você precisa aceitar os Termos e Condições para se registrar.');
             return;
@@ -43,16 +43,19 @@ export const RegisterForm = () => {
 
         setIsLoading(true);
         setError('');
-
+        
         try {
             const result = await register(formData);
-            console.log('📥 Resultado do registro:', result);
             
             if (result.success) {
-                alert('✅ Conta criada com sucesso! Faça login para continuar.');
+                toast.success('Conta criada com sucesso!', {
+                    description: 'Faça login para continuar.'
+                });
                 navigate('/login');
             } else {
-                setError(result.error || 'Erro ao criar conta. Tente novamente.');
+                toast.error('Erro ao criar conta', {
+                    description: result.error || 'Tente novamente mais tarde.'
+                });
             }
         } catch (error) {
             console.error('❌ Erro no registro:', error);
@@ -73,74 +76,36 @@ export const RegisterForm = () => {
             </h2>
 
             {error && (
-                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit}>
-                <div className="mb-6">
-                    <label
-                        htmlFor="name"
-                        className="block text-sm font-medium text-gray-600 mb-1"
-                    >
-                        Nome Completo
-                    </label>
-                    <input
-                        type="text"
-                        id="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900"
-                        required
-                        placeholder="Seu nome completo"
-                    />
-                </div>
+                <Input
+                    id="name"
+                    label="Nome Completo"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Seu nome completo"
+                />
 
-                <div className="mb-6">
-                    <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-gray-600 mb-1"
-                    >
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900"
-                        required
-                        placeholder="seu@email.com"
-                    />
-                </div>
-
-                <div className="mb-6 relative">
-                    <label
-                        htmlFor="password"
-                        className="block text-sm font-medium text-gray-600 mb-1"
-                    >
-                        Senha
-                    </label>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full px-1 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-700 text-gray-900"
-                        required
-                        minLength="6"
-                        placeholder="Mínimo 6 caracteres"
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-1 top-8 text-gray-500 hover:text-gray-700"
-                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                    >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                </div>
+                <Input
+                    id="email"
+                    type="email"
+                    label="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                />
+                <PasswordInput
+                    id="password"
+                    label="Senha"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                />
 
                 <div className="flex items-center text-sm mb-8">
                     <input
@@ -148,9 +113,9 @@ export const RegisterForm = () => {
                         id="terms"
                         checked={agreeTerms}
                         onChange={(e) => setAgreeTerms(e.target.checked)}
-                        className="h-4 w-4 border-gray-300 rounded text-blue-700 focus:ring-blue-600"
+                        className="h-4 w-4 border-gray-300 rounded text-blue-700 focus:ring-blue-600 cursor-pointer"
                     />
-                    <label htmlFor="terms" className="ml-2 text-gray-600">
+                    <label htmlFor="terms" className="ml-2 text-gray-600 cursor-pointer">
                         Eu aceito os{' '}
                         <Link to="/terms" className="text-blue-700 hover:text-blue-800 hover:underline">
                             Termos & Condições
@@ -158,10 +123,7 @@ export const RegisterForm = () => {
                     </label>
                 </div>
 
-                <Button
-                    type="submit"
-                    disabled={isLoading || !agreeTerms}
-                >
+                <Button type="submit" disabled={isLoading || !agreeTerms}>
                     {isLoading ? 'Registrando...' : 'Criar Conta'}
                 </Button>
 
