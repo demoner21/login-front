@@ -17,20 +17,16 @@ export const AuthProvider = ({ children }) => {
   const verifySession = async () => {
     try {
       const response = await authAPI.refreshToken();
-
       const { data } = response.data;
 
       if (data && data.access_token) {
         api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
-        
         setUser(data.user);
         setIsAuthenticated(true);
       } else {
         throw new Error('Token não recebido');
       }
-
     } catch (error) {
-
       setIsAuthenticated(false);
       setUser(null);
       delete api.defaults.headers.common['Authorization'];
@@ -45,15 +41,14 @@ export const AuthProvider = ({ children }) => {
       const { data } = response.data;
 
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
-      
       setIsAuthenticated(true);
       setUser(data.user);
-      
+
       return { success: true, data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Erro ao fazer login' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Erro ao fazer login'
       };
     }
   };
@@ -63,9 +58,9 @@ export const AuthProvider = ({ children }) => {
       const response = await usersAPI.create(userData);
       return { success: true, data: response.data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Erro ao criar conta' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Erro ao criar conta'
       };
     }
   };
@@ -83,6 +78,52 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserProfile = async (updatedData) => {
+    try {
+      await usersAPI.update(user.id, updatedData);
+
+      setUser((currentUser) => {
+        const newUserState = {
+          ...currentUser,
+          ...updatedData
+        };
+        return newUserState;
+      });
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Erro ao atualizar perfil.'
+      };
+    }
+  };
+
+  const updateUserPhoto = async (file) => {
+    try {
+      const response = await usersAPI.uploadAvatar(user.id, file);
+      const newAvatarUrl =
+        response.data.avatar_url ||
+        response.data.url ||
+        response.data.data?.avatar_url;
+
+      if (newAvatarUrl) {
+        setUser(currentUser => ({
+          ...currentUser,
+          avatar_url: newAvatarUrl
+        }));
+        return { success: true };
+      }
+
+      return { success: true, warning: 'Foto enviada, mas URL não retornada.' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Falha ao enviar imagem.'
+      };
+    }
+  };
+
   const value = {
     isAuthenticated,
     user,
@@ -90,6 +131,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUserProfile,
+    updateUserPhoto
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
