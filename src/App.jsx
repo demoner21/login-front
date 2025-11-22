@@ -7,10 +7,10 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import MainLayout from './layouts/MainLayout';
 import FarmMapPage from './pages/FarmMapPage/FarmMapPage'
 import TaskPage from './pages/TaskPage/TaskPage';
+import ProfilePage from './pages/ProfilePage/ProfilePage';
 
 const CropsPage = () => <div className="text-2xl font-bold">Página Crops</div>;
 const ReportsPage = () => <div className="text-2xl font-bold">Página Reports</div>;
-const ProfilePage = () => <div className="text-2xl font-bold">Página Profile</div>;
 
 function App() {
 
