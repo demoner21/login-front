@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { authAPI, usersAPI } from '../service/api';
+import api, { authAPI, usersAPI } from '../service/api'; // Ajuste o caminho conforme sua estrutura
 
 const AuthContext = createContext(null);
 
@@ -10,23 +10,62 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Inicializa a sessão ao carregar a página
   useEffect(() => {
     verifySession();
   }, []);
 
+  // Função auxiliar para o "Cache Busting" da imagem
+  const applyCacheBusting = (userData) => {
+    if (userData && userData.avatar_url) {
+      const timestamp = new Date().getTime();
+      // Verifica se já tem query params para usar '&' ou '?'
+      const separator = userData.avatar_url.includes('?') ? '&' : '?';
+      return {
+        ...userData,
+        avatar_url: `${userData.avatar_url}${separator}t=${timestamp}`
+      };
+    }
+    return userData;
+  };
+
   const verifySession = async () => {
     try {
+      // 1. Tenta renovar o token silenciosamente
       const response = await authAPI.refreshToken();
       const { data } = response.data;
 
       if (data && data.access_token) {
         api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
-        setUser(data.user);
+        
+        let fullUserData = data.user;
+
+        // 2. ESTRATÉGIA DE CARGA COMPLETA:
+        // Se o login retorna dados parciais, buscamos o perfil completo agora.
+        // Isso impede que campos como 'phone' ou 'address' venham vazios.
+        try {
+            if (data.user && data.user.id) {
+                const profileResponse = await usersAPI.getById(data.user.id);
+                // Ajuste conforme o retorno do seu backend (response.data ou response.data.data)
+                if (profileResponse.data && profileResponse.data.data) {
+                    fullUserData = profileResponse.data.data;
+                } else if (profileResponse.data) {
+                    fullUserData = profileResponse.data;
+                }
+            }
+        } catch (profileError) {
+            console.warn("Não foi possível carregar perfil completo, usando dados do token.", profileError);
+        }
+
+        const userWithCache = applyCacheBusting(fullUserData);
+        setUser(userWithCache);
         setIsAuthenticated(true);
       } else {
         throw new Error('Token não recebido');
       }
+
     } catch (error) {
+      // Se falhar o refresh, limpa tudo
       setIsAuthenticated(false);
       setUser(null);
       delete api.defaults.headers.common['Authorization'];
@@ -41,14 +80,20 @@ export const AuthProvider = ({ children }) => {
       const { data } = response.data;
 
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+      
       setIsAuthenticated(true);
-      setUser(data.user);
-
+      
+      // Aplicamos o cache busting na foto que veio do login
+      setUser(applyCacheBusting(data.user));
+      
+      // NOTA: Se o login retornar usuário incompleto, a próxima vez que
+      // der F5, o verifySession buscará os dados completos.
+      
       return { success: true, data };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Erro ao fazer login'
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Erro ao fazer login' 
       };
     }
   };
@@ -58,9 +103,9 @@ export const AuthProvider = ({ children }) => {
       const response = await usersAPI.create(userData);
       return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Erro ao criar conta'
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Erro ao criar conta' 
       };
     }
   };
@@ -78,23 +123,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUserProfile = async (updatedData) => {
+  // ✅ Função Corrigida para Atualização Parcial
+  const updateUserProfile = async (partialUserData) => {
     try {
-      await usersAPI.update(user.id, updatedData);
+      // 1. Envia para o backend APENAS os dados recebidos (que já devem estar filtrados pelo componente)
+      await usersAPI.update(user.id, partialUserData);
 
+      // 2. Atualiza o estado local fazendo MERGE (fusão)
+      // Mantém os dados antigos (avatar, id, etc) e sobrepõe apenas os novos
       setUser((currentUser) => {
         const newUserState = {
           ...currentUser,
-          ...updatedData
+          ...partialUserData
         };
         return newUserState;
       });
 
       return { success: true };
+
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Erro ao atualizar perfil.'
+      console.error('Erro ao atualizar perfil:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Erro ao atualizar perfil.' 
       };
     }
   };
@@ -102,24 +153,25 @@ export const AuthProvider = ({ children }) => {
   const updateUserPhoto = async (file) => {
     try {
       const response = await usersAPI.uploadAvatar(user.id, file);
-      const newAvatarUrl =
-        response.data.avatar_url ||
-        response.data.url ||
-        response.data.data?.avatar_url;
+      // Suporta retorno { data: user } ou { data: { data: user } }
+      const updatedUserFromBackend = response.data.data || response.data;
 
-      if (newAvatarUrl) {
-        setUser(currentUser => ({
-          ...currentUser,
-          avatar_url: newAvatarUrl
-        }));
+      if (updatedUserFromBackend) {
+        // Reaplica o cache busting com timestamp novo para forçar atualização da imagem
+        const userWithNewPhoto = applyCacheBusting(updatedUserFromBackend);
+        
+        // Atualiza estado global
+        setUser(userWithNewPhoto);
         return { success: true };
       }
-
+      
       return { success: true, warning: 'Foto enviada, mas URL não retornada.' };
+
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Falha ao enviar imagem.'
+      console.error('Erro no upload de avatar:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Falha ao enviar imagem.' 
       };
     }
   };
@@ -132,7 +184,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUserProfile,
-    updateUserPhoto
+    updateUserPhoto,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
