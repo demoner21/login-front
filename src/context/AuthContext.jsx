@@ -79,16 +79,31 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(email, password);
       const { data } = response.data;
 
+      // 1. Configura o Token imediatamente
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
       
+      // 2. Busca os dados COMPLETOS do usuário (incluindo Avatar)
+      // O login retorna dados parciais, então forçamos a busca do perfil completo agora.
+      let fullUserData = data.user;
+
+      try {
+        if (data.user && data.user.id) {
+            const profileResponse = await usersAPI.getById(data.user.id);
+            // Ajuste de segurança para pegar o local certo dos dados
+            if (profileResponse.data && profileResponse.data.data) {
+                fullUserData = profileResponse.data.data;
+            } else if (profileResponse.data) {
+                fullUserData = profileResponse.data;
+            }
+        }
+      } catch (error) {
+        console.warn("Não foi possível carregar perfil completo no login, usando dados parciais.", error);
+      }
+
+      // 3. Atualiza o estado com os dados completos e Cache Busting na imagem
       setIsAuthenticated(true);
-      
-      // Aplicamos o cache busting na foto que veio do login
-      setUser(applyCacheBusting(data.user));
-      
-      // NOTA: Se o login retornar usuário incompleto, a próxima vez que
-      // der F5, o verifySession buscará os dados completos.
-      
+      setUser(applyCacheBusting(fullUserData));
+
       return { success: true, data };
     } catch (error) {
       return { 
