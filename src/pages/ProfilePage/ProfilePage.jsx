@@ -3,8 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Pencil, Save, X, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { SecuritySettings } from '../../features/profile/SecuritySettings';
-
-// Importamos o componente centralizado
+import { Skeleton } from '../../shared/ui/Skeleton';
 import { Input } from '../../shared/ui/Input';
 
 // --- Componente Card Genérico (Mantido igual) ---
@@ -70,7 +69,18 @@ const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children, hid
 
 // --- InfoField Refatorado ---
 // Agora ele usa o componente <Input /> quando está em modo de edição
-const InfoField = ({ label, value, name, isEditing, onChange, type = "text", placeholder }) => {
+const InfoField = ({ label, value, name, isEditing, onChange, type = "text", placeholder, isLoading }) => {
+    if (isLoading) {
+        return (
+             <div className="flex flex-col w-full mb-6">
+                <span className="block text-sm font-medium text-gray-600 mb-1">{label}</span>
+                <div className="py-2 min-h-[40px] flex items-center">
+                    <Skeleton className="h-6 w-full max-w-[200px]" />
+                </div>
+            </div>
+        );
+    }
+
     if (isEditing) {
         return (
             <Input 

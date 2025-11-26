@@ -1,7 +1,31 @@
 import React from 'react';
 import { TaskItem } from './TaskItem';
+import { Skeleton } from '../../shared/ui/Skeleton';
 
-export const TaskList = ({ tasks = [] }) => {
+export const TaskList = ({ tasks = [], isLoading = false }) => {
+    
+    if (isLoading) {
+        return (
+            <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="rounded-lg p-3 shadow-sm border-l-4 border-gray-200 bg-white">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="space-y-2 w-3/4">
+                                <Skeleton className="h-5 w-1/2" />
+                                <Skeleton className="h-3 w-3/4" />
+                            </div>
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                        <div className="flex gap-4 mt-2">
+                             <Skeleton className="h-4 w-20" />
+                             <Skeleton className="h-4 w-16" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
     if (tasks.length === 0) {
         return (
             <div className="rounded-2xl bg-white p-6 shadow-sm text-center">

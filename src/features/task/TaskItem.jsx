@@ -1,7 +1,6 @@
 import React from 'react';
-import { Calendar, Tag } from 'lucide-react'; // 'Info' removido pois está comentado
+import { Calendar, Tag } from 'lucide-react';
 
-// (priorityStyles e statusStyles não mudam)
 const priorityStyles = {
     'Baixa': 'border-green-500 bg-green-50',
     'Média': 'border-yellow-500 bg-yellow-50',
@@ -23,32 +22,32 @@ export const TaskItem = ({ task }) => {
     return (
         <div className={`rounded-lg p-3 shadow-sm border-l-4 ${priorityClass}`}>
             <div className="flex justify-between items-start">
-                {/* Título e Descrição */}
+
                 <div>
-                    {/* 2. Tamanho da fonte do título 'text-lg' para 'text-base' (menor) */}
+
                     <h3 className="text-base font-semibold text-gray-900">{task.title}</h3>
-                    {/* 3. Margem superior da descrição 'mt-1' removida */}
+
                     <p className="text-sm text-gray-600">{task.description}</p>
                 </div>
-                {/* Status (sem alteração) */}
+
                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusClass}`}>
                     {task.status}
                 </span>
             </div>
 
-            {/* 4. Margem superior 'mt-4' (1rem) alterada para 'mt-2' (0.5rem) */}
+
             <div className="flex items-center gap-6 text-sm text-gray-500 mt-2">
-                {/* Data */}
+
                 <div className="flex items-center gap-1.5">
                     <Calendar size={14} />
                     <span>{task.dueDate}</span>
                 </div>
-                {/* Prioridade */}
+
                 <div className="flex items-center gap-1.5">
                     <Tag size={14} />
                     <span>{task.priority}</span>
                 </div>
-                {/* ROI (Desabilitado) */}
+
             </div>
         </div>
     );
