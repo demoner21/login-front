@@ -1,214 +1,271 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { authAPI, usersAPI } from '../service/api'; // Ajuste o caminho conforme sua estrutura
+import api, { authAPI, usersAPI } from '../service/api';
+import { User } from '../types/user';
+import { AuthState, AuthContextType } from '../types/auth';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [authState, setAuthState] = useState<AuthState>({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: true,
+    });
+    
+    const navigate = useNavigate();
 
-  // Inicializa a sessão ao carregar a página
-  useEffect(() => {
-    verifySession();
-  }, []);
+    /**
+     * Cache Busting para Avatares
+     */
+    const applyCacheBusting = useCallback((userData: User): User => {
+        if (userData?.avatar_url) {
+            const timestamp = new Date().getTime();
+            const separator = userData.avatar_url.includes('?') ? '&' : '?';
+            return {
+                ...userData,
+                avatar_url: `${userData.avatar_url}${separator}t=${timestamp}`
+            };
+        }
+        return userData;
+    }, []);
 
-  // Função auxiliar para o "Cache Busting" da imagem
-  const applyCacheBusting = (userData) => {
-    if (userData && userData.avatar_url) {
-      const timestamp = new Date().getTime();
-      // Verifica se já tem query params para usar '&' ou '?'
-      const separator = userData.avatar_url.includes('?') ? '&' : '?';
-      return {
-        ...userData,
-        avatar_url: `${userData.avatar_url}${separator}t=${timestamp}`
-      };
-    }
-    return userData;
-  };
-
-  const verifySession = async () => {
-    try {
-      // 1. Tenta renovar o token silenciosamente
-      const response = await authAPI.refreshToken();
-      const { data } = response.data;
-
-      if (data && data.access_token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
-        
-        let fullUserData = data.user;
-
-        // 2. ESTRATÉGIA DE CARGA COMPLETA:
-        // Se o login retorna dados parciais, buscamos o perfil completo agora.
-        // Isso impede que campos como 'phone' ou 'address' venham vazios.
+    /**
+     * Busca perfil completo do usuário
+     */
+    const fetchFullUserProfile = useCallback(async (userId: number): Promise<User> => {
         try {
-            if (data.user && data.user.id) {
-                const profileResponse = await usersAPI.getById(data.user.id);
-                // Ajuste conforme o retorno do seu backend (response.data ou response.data.data)
-                if (profileResponse.data && profileResponse.data.data) {
-                    fullUserData = profileResponse.data.data;
-                } else if (profileResponse.data) {
-                    fullUserData = profileResponse.data;
+            const profileResponse = await usersAPI.getById(userId);
+            return profileResponse.data.data || profileResponse.data;
+        } catch (error) {
+            console.warn("Não foi possível carregar perfil completo:", error);
+            throw error;
+        }
+    }, []);
+
+    /**
+     * Silent Refresh com HttpOnly Cookies
+     */
+    const verifySession = useCallback(async (): Promise<void> => {
+        try {
+            const response = await authAPI.refreshToken();
+            const { data } = response.data;
+
+            if (data?.access_token) {
+                // Configura token no header
+                api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
+                
+                // Tenta buscar perfil completo
+                let userData: User = data.user;
+                try {
+                    if (data.user?.id) {
+                        userData = await fetchFullUserProfile(data.user.id);
+                    }
+                } catch {
+                    // Mantém dados parciais se falhar
                 }
+
+                setAuthState({
+                    user: applyCacheBusting(userData),
+                    token: data.access_token,
+                    isAuthenticated: true,
+                    isLoading: false,
+                });
             }
-        } catch (profileError) {
-            console.warn("Não foi possível carregar perfil completo, usando dados do token.", profileError);
+        } catch (error) {
+            setAuthState({
+                user: null,
+                token: null,
+                isAuthenticated: false,
+                isLoading: false,
+            });
+            delete api.defaults.headers.common['Authorization'];
         }
+    }, [applyCacheBusting, fetchFullUserProfile]);
 
-        const userWithCache = applyCacheBusting(fullUserData);
-        setUser(userWithCache);
-        setIsAuthenticated(true);
-      } else {
-        throw new Error('Token não recebido');
-      }
+    useEffect(() => {
+        verifySession();
+    }, [verifySession]);
 
-    } catch (error) {
-      // Se falhar o refresh, limpa tudo
-      setIsAuthenticated(false);
-      setUser(null);
-      delete api.defaults.headers.common['Authorization'];
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const login = async (email, password) => {
-    try {
-      const response = await authAPI.login(email, password);
-      const { data } = response.data;
-
-      // 1. Configura o Token imediatamente
-      api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
-      
-      // 2. Busca os dados COMPLETOS do usuário (incluindo Avatar)
-      // O login retorna dados parciais, então forçamos a busca do perfil completo agora.
-      let fullUserData = data.user;
-
-      try {
-        if (data.user && data.user.id) {
-            const profileResponse = await usersAPI.getById(data.user.id);
-            // Ajuste de segurança para pegar o local certo dos dados
-            if (profileResponse.data && profileResponse.data.data) {
-                fullUserData = profileResponse.data.data;
-            } else if (profileResponse.data) {
-                fullUserData = profileResponse.data;
+    /**
+     * Login com token e dados do usuário
+     * Adaptado para a interface AuthContextType existente
+     */
+    const login = useCallback(async (accessToken: string, userData: User): Promise<void> => {
+        try {
+            // Configura token no header
+            api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+            
+            // Busca perfil completo
+            let fullUserData = userData;
+            try {
+                if (userData?.id) {
+                    fullUserData = await fetchFullUserProfile(userData.id);
+                }
+            } catch {
+                // Mantém dados originais se falhar
             }
+
+            setAuthState({
+                user: applyCacheBusting(fullUserData),
+                token: accessToken,
+                isAuthenticated: true,
+                isLoading: false,
+            });
+        } catch (error) {
+            console.error('Erro ao processar login:', error);
+            throw error;
         }
-      } catch (error) {
-        console.warn("Não foi possível carregar perfil completo no login, usando dados parciais.", error);
-      }
+    }, [applyCacheBusting, fetchFullUserProfile]);
 
-      // 3. Atualiza o estado com os dados completos e Cache Busting na imagem
-      setIsAuthenticated(true);
-      setUser(applyCacheBusting(fullUserData));
+    /**
+     * Login com email/senha (mantido para compatibilidade)
+     */
+    const loginWithCredentials = async (email: string, password: string): Promise<{ success: boolean; error?: string; data?: any }> => {
+        try {
+            const response = await authAPI.login(email, password);
+            const { data } = response.data;
 
-      return { success: true, data };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Erro ao fazer login' 
-      };
-    }
-  };
+            if (data?.access_token && data?.user) {
+                await login(data.access_token, data.user);
+                return { success: true, data };
+            }
+            
+            return { success: false, error: 'Resposta inválida do servidor' };
+        } catch (error: any) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Erro ao fazer login' 
+            };
+        }
+    };
 
-  const register = async (userData) => {
-    try {
-      const response = await usersAPI.create(userData);
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Erro ao criar conta' 
-      };
-    }
-  };
+    /**
+     * Registro de novo usuário
+     */
+    const register = async (userData: Partial<User>): Promise<{ success: boolean; error?: string; data?: any }> => {
+        try {
+            const response = await usersAPI.create(userData);
+            return { success: true, data: response.data };
+        } catch (error: any) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Erro ao criar conta' 
+            };
+        }
+    };
 
-  const logout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Erro no logout:', error);
-    } finally {
-      delete api.defaults.headers.common['Authorization'];
-      setIsAuthenticated(false);
-      setUser(null);
-      navigate('/login');
-    }
-  };
+    /**
+     * Logout
+     */
+    const logout = useCallback(async (): Promise<void> => {
+        try {
+            await authAPI.logout();
+        } catch (error) {
+            console.error('Erro no logout:', error);
+        } finally {
+            delete api.defaults.headers.common['Authorization'];
+            setAuthState({
+                user: null,
+                token: null,
+                isAuthenticated: false,
+                isLoading: false,
+            });
+            navigate('/login');
+        }
+    }, [navigate]);
 
-  // ✅ Função Corrigida para Atualização Parcial
-  const updateUserProfile = async (partialUserData) => {
-    try {
-      // 1. Envia para o backend APENAS os dados recebidos (que já devem estar filtrados pelo componente)
-      await usersAPI.update(user.id, partialUserData);
+    /**
+     * Atualização parcial do usuário (implementa a interface AuthContextType)
+     */
+    const updateUser = useCallback((data: Partial<User>): void => {
+        setAuthState(prev => ({
+            ...prev,
+            user: prev.user ? applyCacheBusting({ ...prev.user, ...data }) : null
+        }));
+    }, [applyCacheBusting]);
 
-      // 2. Atualiza o estado local fazendo MERGE (fusão)
-      // Mantém os dados antigos (avatar, id, etc) e sobrepõe apenas os novos
-      setUser((currentUser) => {
-        const newUserState = {
-          ...currentUser,
-          ...partialUserData
-        };
-        return newUserState;
-      });
-
-      return { success: true };
-
-    } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Erro ao atualizar perfil.' 
-      };
-    }
-  };
-
-  const updateUserPhoto = async (file) => {
-    try {
-      const response = await usersAPI.uploadAvatar(user.id, file);
-      // Suporta retorno { data: user } ou { data: { data: user } }
-      const updatedUserFromBackend = response.data.data || response.data;
-
-      if (updatedUserFromBackend) {
-        // Reaplica o cache busting com timestamp novo para forçar atualização da imagem
-        const userWithNewPhoto = applyCacheBusting(updatedUserFromBackend);
+    /**
+     * Atualização de perfil com persistência no backend
+     */
+    const updateUserProfile = async (partialData: Partial<User>): Promise<{ success: boolean; error?: string }> => {
+        if (!authState.user?.id) {
+            return { success: false, error: 'Usuário não autenticado' };
+        }
         
-        // Atualiza estado global
-        setUser(userWithNewPhoto);
-        return { success: true };
-      }
-      
-      return { success: true, warning: 'Foto enviada, mas URL não retornada.' };
+        try {
+            await usersAPI.update(authState.user.id, partialData);
+            updateUser(partialData); // Reusa a função updateUser
+            return { success: true };
+        } catch (error: any) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Erro ao atualizar perfil' 
+            };
+        }
+    };
 
-    } catch (error) {
-      console.error('Erro no upload de avatar:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Falha ao enviar imagem.' 
-      };
-    }
-  };
+    /**
+     * Upload de foto do usuário
+     */
+    const updateUserPhoto = async (file: File): Promise<{ success: boolean; error?: string }> => {
+        if (!authState.user?.id) {
+            return { success: false, error: 'Usuário não autenticado' };
+        }
 
-  const value = {
-    isAuthenticated,
-    user,
-    loading,
-    login,
-    register,
-    logout,
-    updateUserProfile,
-    updateUserPhoto,
-  };
+        try {
+            const response = await usersAPI.uploadAvatar(authState.user.id, file);
+            const updatedUser = response.data.data || response.data;
+            
+            if (updatedUser) {
+                updateUser(updatedUser); // Reusa a função updateUser
+            }
+            
+            return { success: true };
+        } catch (error: any) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Falha ao enviar imagem' 
+            };
+        }
+    };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    // Valor do contexto combinando estado e métodos
+    const contextValue: AuthContextType = {
+        // Estado
+        user: authState.user,
+        token: authState.token,
+        isAuthenticated: authState.isAuthenticated,
+        isLoading: authState.isLoading,
+        
+        // Métodos da interface
+        login,
+        logout,
+        updateUser,
+        
+        // Métodos extras (não na interface, mas expostos)
+        register,
+        loginWithCredentials,
+        updateUserProfile,
+        updateUserPhoto,
+        verifySession,
+    };
+
+    return (
+        <AuthContext.Provider value={contextValue}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-  }
-  return context;
+/**
+ * Hook personalizado para usar o contexto de autenticação
+ */
+export const useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    }
+    return context;
 };
