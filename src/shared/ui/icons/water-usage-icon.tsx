@@ -1,7 +1,7 @@
-import React from 'react'; // Adicione a importação do React (boa prática)
+import React, { SVGProps } from 'react';
 
 // Use esta definição para o ícone de água
-export const WaterUsageIcon = (props) => (
+export const WaterUsageIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -22,5 +22,3 @@ export const WaterUsageIcon = (props) => (
         />
     </svg>
 );
-
-// GARANTA QUE NÃO HÁ NENHUM OUTRO 'export const WaterUsageIcon' NESTE ARQUIVO

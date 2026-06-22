@@ -1,7 +1,7 @@
-import { Container } from '@/shared/ui/Container';
-import { ArrowRightIcon } from '@/shared/ui/icons/ArrowRightIcon';
-import { ArrowDownIcon } from '@/shared/ui/icons/ArrowDownIcon';
-import { CheckCircleIcon } from '@/shared/ui/icons/CheckCircleIcon';
+import { Container } from '@/shared/ui/container';
+import { ArrowRightIcon } from '@/shared/ui/icons/arrow-right-icon';
+import { ArrowDownIcon } from '@/shared/ui/icons/arrow-down-icon';
+import { CheckCircleIcon } from '@/shared/ui/icons/check-circle-icon';
 
 export const HeroSection = () => {
     return (

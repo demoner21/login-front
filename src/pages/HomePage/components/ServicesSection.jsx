@@ -1,8 +1,8 @@
-import { Container } from '@/shared/ui/Container';
-import { CropMonitoringIcon } from '@/shared/ui/icons/CropMonitoringIcon';
-import { PrecisionFarmingIcon } from '@/shared/ui/icons/PrecisionFarmingIcon';
-import { DataAnalyticsIcon } from '@/shared/ui/icons/DataAnalyticsIcon';
-import { LocationIcon } from '@/shared/ui/icons/LocationIcon';
+import { Container } from '@/shared/ui/container';
+import { CropMonitoringIcon } from '@/shared/ui/icons/crop-monitoring-icon';
+import { PrecisionFarmingIcon } from '@/shared/ui/icons/precision-farming-icon';
+import { DataAnalyticsIcon } from '@/shared/ui/icons/data-analytics-icon';
+import { LocationIcon } from '@/shared/ui/icons/location-icon';
 
 const ServiceCard = ({ icon, title, description }) => {
     const IconComponent = icon;

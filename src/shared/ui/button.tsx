@@ -1,4 +1,12 @@
-import React from 'react';
+import React, { ReactNode, MouseEvent } from 'react';
+
+interface ButtonProps {
+    children: ReactNode;
+    type?: 'button' | 'submit' | 'reset';
+    onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+    disabled?: boolean;
+    className?: string;
+}
 
 export const Button = ({
     children,
@@ -6,7 +14,7 @@ export const Button = ({
     onClick,
     disabled = false,
     className = '',
-}) => {
+}: ButtonProps) => {
     // Estilos base que se repetem
     const baseStyles = `
         w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 

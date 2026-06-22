@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Pencil, Save, X, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context.tsx';
 import { SecuritySettings } from '@/features/profile/SecuritySettings';
-import { Skeleton } from '@/shared/ui/Skeleton';
-import { Input } from '@/shared/ui/Input';
+import { Skeleton } from '@/shared/ui/skeleton';
+import { Input } from '@/shared/ui/input';
 
 // --- Componente Card Genérico (Mantido igual) ---
 const SectionCard = ({ title, onEdit, isEditing, onSave, onCancel, children, hideHeader = false }) => {

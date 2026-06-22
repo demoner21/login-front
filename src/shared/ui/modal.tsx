@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { X } from 'lucide-react';
 
-export const Modal = ({ isOpen, onClose, children }) => {
-    
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    children: ReactNode;
+}
+
+export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     // 1. MUDANÇA: Não vamos mais retornar 'null'.
     // O componente sempre existe, mas fica invisível.
     // Isso é o que permite a animação de *saída* (fade-out).

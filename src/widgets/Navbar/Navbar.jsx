@@ -1,4 +1,4 @@
-import { Container } from '@/shared/ui/Container';
+import { Container } from '@/shared/ui/container';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 

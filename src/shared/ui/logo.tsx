@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const Logo = () => {
     return (
         <a href="/" className="text-2xl font-bold text-gray-900">

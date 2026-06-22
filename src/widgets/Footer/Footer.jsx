@@ -1,7 +1,7 @@
 // src/widgets/Footer/Footer.jsx
 
-import { Container } from '@/shared/ui/Container';
-import { ArrowRightIcon } from '@/shared/ui/icons/ArrowRightIcon';
+import { Container } from '@/shared/ui/container';
+import { ArrowRightIcon } from '@/shared/ui/icons/arrow-right-icon';
 
 // Subcomponente interno para os links do rodapé
 const FooterLink = ({ href = '#', children }) => (

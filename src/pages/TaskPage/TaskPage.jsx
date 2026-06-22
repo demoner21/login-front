@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { TaskSummary } from '@/widgets/Task/TaskSummary';
-import { Modal } from '@/shared/ui/Modal';
+import { Modal } from '@/shared/ui/modal';
 // 1. Importe as visualizações do calendário diretamente
 import { WeekScrollerView } from '@/features/task/WeekScrollerView';
 import { FullMonthView } from '@/features/task/FullMonthView';
-import { CreateTaskForm } from '@//features/task/CreateTaskForm';
-import { TaskList } from '@//features/task/TaskList';
+import { CreateTaskForm } from '@/features/task/CreateTaskForm';
+import { TaskList } from '@/features/task/TaskList';
 import { Plus } from 'lucide-react';
 
 // --- (Lógica de MOCK_TASKS e TODAY_STRING permanece a mesma) ---

@@ -1,4 +1,6 @@
-export const CheckCircleIcon = (props) => (
+import React, { SVGProps } from 'react';
+
+export const CheckCircleIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/shared/ui/Button'; // Reutilizando seu botão
+import { Button } from '@/shared/ui/button'; // Reutilizando seu botão
 
 const NotFoundPage = () => {
     return (

@@ -1,7 +1,7 @@
 // src/widgets/Newsletter/Newsletter.jsx
 
-import { Container } from '@/shared/ui/Container';
-import { ArrowRightIcon } from '@/shared/ui/icons/ArrowRightIcon';
+import { Container } from '@/shared/ui/container';
+import { ArrowRightIcon } from '@/shared/ui/icons/arrow-right-icon';
 
 export const Newsletter = () => {
     return (

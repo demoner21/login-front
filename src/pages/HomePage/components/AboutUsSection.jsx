@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Container } from '@/shared/ui/Container';
-import { ArrowRightIcon } from '@/shared/ui/icons/ArrowRightIcon';
+import { Container } from '@/shared/ui/container';
+import { ArrowRightIcon } from '@/shared/ui/icons/arrow-right-icon';
 
 const ProductCard = ({ imageSrc, title }) => (
     <div className="rounded-2xl overflow-hidden shadow-lg bg-white">

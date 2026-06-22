@@ -1,6 +1,6 @@
-import { Container } from '@/shared/ui/Container';
-import { YieldIcon } from '@/shared/ui/icons/YieldIcon';
-import { WaterUsageIcon } from '@/shared/ui/icons/WaterUsageIcon';
+import { Container } from '@/shared/ui/container';
+import { YieldIcon } from '@/shared/ui/icons/yield-icon';
+import { WaterUsageIcon } from '@/shared/ui/icons/water-usage-icon';
 
 // Subcomponente para os itens de estatística
 const StatItem = ({ icon, value, description }) => {

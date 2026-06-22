@@ -1,4 +1,6 @@
-export const ArrowDownIcon = (props) => (
+import React, { SVGProps } from 'react';
+
+export const ArrowDownIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

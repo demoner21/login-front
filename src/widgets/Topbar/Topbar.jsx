@@ -4,7 +4,7 @@ import { Search, Bell, X, LogOut, User, Shield, Users, CreditCard } from 'lucide
 import shp from 'shpjs';
 import { useMap } from '@/context/map-context';
 import { useAuth } from '@/context/auth-context.tsx';
-import UploadIcon from '@/shared/ui/icons/UploadIcon';
+import UploadIcon from '@/shared/ui/icons/upload-icon';
 
 export const Topbar = () => {
     const location = useLocation();

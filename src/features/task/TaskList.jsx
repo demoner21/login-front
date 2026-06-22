@@ -1,6 +1,6 @@
 import React from 'react';
 import { TaskItem } from './TaskItem';
-import { Skeleton } from '@/shared/ui/Skeleton';
+import { Skeleton } from '@/shared/ui/skeleton';
 
 export const TaskList = ({ tasks = [], isLoading = false }) => {
     

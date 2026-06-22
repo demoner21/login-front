@@ -1,4 +1,4 @@
-import { Container } from '@/shared/ui/Container';
+import { Container } from '@/shared/ui/container';
 
 export const ConnectSection = () => {
     return (

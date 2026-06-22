@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+
+interface PasswordInputProps {
+    id: string;
+    label: string;
+    value: string;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    placeholder?: string;
+    required?: boolean;
+    error?: string;
+}
 
 export const PasswordInput = ({ 
     id, 
@@ -9,7 +19,7 @@ export const PasswordInput = ({
     placeholder = "Mínimo 6 caracteres", 
     required = false,
     error // Opcional: para mostrar erro visual se necessário
-}) => {
+}: PasswordInputProps) => {
     const [showPassword, setShowPassword] = useState(false);
 
     // O estilo exato que você pediu
