@@ -1,15 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { HomePage } from "@/pages/HomePage/HomePage.jsx";
-import LoginPage from './pages/LoginPage/LoginPage';
-import RegisterPage from './pages/RegisterPage/RegisterPage';
-import DashboardPage from './pages/DashboardPage/DashboardPage';
-import ProtectedRoute from './routes/ProtectedRoute';
-import MainLayout from './layouts/MainLayout';
-import FarmMapPage from './pages/FarmMapPage/FarmMapPage'
-import TaskPage from './pages/TaskPage/TaskPage';
-import ProfilePage from './pages/ProfilePage/ProfilePage';
-import NotFoundPage from './pages/NotFoundPage/NotFoundPage';
+import LoginPage from '@/pages/LoginPage/LoginPage';
+import RegisterPage from '@/pages/RegisterPage/RegisterPage';
+import DashboardPage from '@/pages/DashboardPage/DashboardPage';
+import ProtectedRoute from '@/routes/ProtectedRoute';
+import MainLayout from '@/layouts/MainLayout';
+import FarmMapPage from '@/pages/FarmMapPage/FarmMapPage'
+import TaskPage from '@/pages/TaskPage/TaskPage';
+import ProfilePage from '@/pages/ProfilePage/ProfilePage';
+import NotFoundPage from '@/pages/NotFoundPage/NotFoundPage';
 
 const CropsPage = () => <div className="text-2xl font-bold">Página Crops</div>;
 const ReportsPage = () => <div className="text-2xl font-bold">Página Reports</div>;

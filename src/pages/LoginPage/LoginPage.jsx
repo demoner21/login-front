@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoginForm } from '../../features/LoginForm/LoginForm';
+import { LoginForm } from '@/features/LoginForm/LoginForm';
 // import { LogoPlaceholder } from '../../shared/ui/LogoPlaceholder'; // Descomente se quiser o logo no painel esquerdo
 
 const LoginPage = () => {

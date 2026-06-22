@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogoPlaceholder } from '../../shared/ui/LogoPlaceholder';
-import { useAuth } from '../../context/AuthContext';
-import { Button } from '../../shared/ui/Button';
-import { Input } from '../../shared/ui/Input';
-import { PasswordInput } from '../../shared/ui/PasswordInput';
+import { LogoPlaceholder } from '@/shared/ui/LogoPlaceholder';
+import { useAuth } from '@/context/auth-context.tsx';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { PasswordInput } from '@/shared/ui/PasswordInput';
 
 export const RegisterForm = () => {
     const [formData, setFormData] = useState({

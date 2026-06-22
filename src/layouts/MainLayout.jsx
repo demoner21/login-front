@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from '../widgets/Sidebar/Sidebar';
-import { Topbar } from '../widgets/Topbar/Topbar';
-import { MapProvider } from '@/context/MapContext';
+import { Sidebar } from '@/widgets/Sidebar/Sidebar';
+import { Topbar } from '@/widgets/Topbar/Topbar';
+import { MapProvider } from '@/context/map-context';
 
 const MainLayout = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);

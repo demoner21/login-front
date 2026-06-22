@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Skeleton } from '../shared/ui/Skeleton';
+import { useAuth } from '@/context/auth-context.tsx';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const ProtectedRoute = () => {
     const { isAuthenticated, loading } = useAuth();

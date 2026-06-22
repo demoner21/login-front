@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Map, Sprout, BarChart3, User, LogOut, Menu, X, ClipboardList } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/auth-context.tsx';
 
 
 const NavItem = ({ to, icon: Icon, isExpanded, children }) => {

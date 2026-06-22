@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Modal } from '../../shared/ui/Modal';
-import { WeekScrollerView } from './WeekScrollerView';
-import { FullMonthView } from './FullMonthView';
+import { Modal } from '@/shared/ui/Modal';
+import { WeekScrollerView } from '@/WeekScrollerView';
+import { FullMonthView } from '@/FullMonthView';
 
 export const CalendarWidget = () => {
     // Estado para controlar o modal do calendário no mobile

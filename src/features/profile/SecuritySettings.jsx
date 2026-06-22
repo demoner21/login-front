@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { AlertCircle, CheckCircle, Trash2, AlertTriangle, Shield } from 'lucide-react';
-import { Button } from '../../shared/ui/Button';
-import { Modal } from '../../shared/ui/Modal';
-import { usersAPI } from '../../service/api';
-import { useAuth } from '../../context/AuthContext';
-import { PasswordInput } from '../../shared/ui/PasswordInput';
+import { Button } from '@/shared/ui/Button';
+import { Modal } from '@/shared/ui/Modal';
+import { usersAPI } from '@/service/api';
+import { useAuth } from '@/context/auth-context.tsx';
+import { PasswordInput } from '@/shared/ui/PasswordInput';
 
 export const SecuritySettings = () => {
     const { user, logout } = useAuth();

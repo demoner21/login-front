@@ -1,17 +1,17 @@
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { authAPI, usersAPI } from '../service/api';
-import { User } from '../types/user';
-import { AuthResponse } from '../types/user'; // Assumindo que AuthResponse está em user.ts
-import { ApiResponse } from '../types/api';
+import api, { authAPI, usersAPI } from '@/service/api';
+import { User } from '@/types/user';
+import { AuthResponse } from '@/types/user'; // Assumindo que AuthResponse está em user.ts
+import { ApiResponse } from '@/types/api';
 import { 
     AuthState, 
     AuthContextType, 
     RegisterData, 
     initialAuthState,
     isFullyAuthenticated 
-} from '../types/auth';
+} from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

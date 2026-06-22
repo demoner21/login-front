@@ -1,5 +1,5 @@
 import React from 'react';
-import { RegisterForm } from '../../features/RegisterForm/RegisterForm';
+import { RegisterForm } from '@/features/RegisterForm/RegisterForm';
 // import { LogoPlaceholder } from '../../shared/ui/LogoPlaceholder';
 
 const RegisterPage = () => {

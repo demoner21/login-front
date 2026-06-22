@@ -25,5 +25,11 @@ export default defineConfig([
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
+    {
+    plugins: { import: importPlugin },
+    rules: {
+      'import/no-relative-parent-imports': 'error', // proíbe ../../
+    }
+  }
   },
 ])

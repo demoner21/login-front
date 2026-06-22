@@ -2,8 +2,8 @@ import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bell, X, LogOut, User, Shield, Users, CreditCard } from 'lucide-react';
 import shp from 'shpjs';
-import { useMap } from '@/context/MapContext';
-import { useAuth } from '@/context/AuthContext';
+import { useMap } from '@/context/map-context';
+import { useAuth } from '@/context/auth-context.tsx';
 import UploadIcon from '@/shared/ui/icons/UploadIcon';
 
 export const Topbar = () => {
