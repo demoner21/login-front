@@ -1,8 +1,15 @@
-import React from 'react';
+interface Task {
+    status: string;
+    [key: string]: unknown;
+}
 
-export const TaskSummary = ({ tasks = [] }) => {
+interface TaskSummaryProps {
+    tasks?: Task[];
+}
+
+export const TaskSummary = ({ tasks = [] }: TaskSummaryProps) => {
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(task => task.status === 'Done').length;
+    const completedTasks = tasks.filter((task) => task.status === 'Done').length;
     const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     return (
@@ -15,7 +22,8 @@ export const TaskSummary = ({ tasks = [] }) => {
                 </div>
                 <div>
                     <p className="text-lg text-gray-700">
-                        <span className="font-bold">{completedTasks}</span> de <span className="font-bold">{totalTasks}</span> tarefas
+                        <span className="font-bold">{completedTasks}</span> de{' '}
+                        <span className="font-bold">{totalTasks}</span> tarefas
                     </p>
                 </div>
             </div>
@@ -23,7 +31,7 @@ export const TaskSummary = ({ tasks = [] }) => {
                 <div
                     className="bg-blue-900 h-2.5 rounded-full"
                     style={{ width: `${percentage}%` }}
-                ></div>
+                />
             </div>
         </div>
     );

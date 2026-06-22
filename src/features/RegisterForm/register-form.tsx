@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoPlaceholder } from '@/shared/ui/logo-placeholder';
-import { useAuth } from '@/context/auth-context.tsx';
+import { useAuth } from '@/context/auth-context';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { PasswordInput } from '@/shared/ui/password-input';
@@ -12,25 +12,25 @@ export const RegisterForm = () => {
         name: '',
         email: '',
         password: '',
-        role_id: 2
+        role_id: 2,
     });
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    
+
     const navigate = useNavigate();
     const { register } = useAuth();
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
-            [e.target.id]: e.target.value
+            [e.target.id]: e.target.value,
         });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+
         if (!agreeTerms) {
             setError('Você precisa aceitar os Termos e Condições para se registrar.');
             return;
@@ -43,22 +43,22 @@ export const RegisterForm = () => {
 
         setIsLoading(true);
         setError('');
-        
+
         try {
             const result = await register(formData);
-            
+
             if (result.success) {
                 toast.success('Conta criada com sucesso!', {
-                    description: 'Faça login para continuar.'
+                    description: 'Faça login para continuar.',
                 });
                 navigate('/login');
             } else {
                 toast.error('Erro ao criar conta', {
-                    description: result.error || 'Tente novamente mais tarde.'
+                    description: result.error || 'Tente novamente mais tarde.',
                 });
             }
-        } catch (error) {
-            console.error('❌ Erro no registro:', error);
+        } catch (err) {
+            console.error('❌ Erro no registro:', err);
             setError('Erro de conexão. Verifique se o backend está rodando.');
         } finally {
             setIsLoading(false);
@@ -90,7 +90,6 @@ export const RegisterForm = () => {
                     required
                     placeholder="Seu nome completo"
                 />
-
                 <Input
                     id="email"
                     type="email"

@@ -1,31 +1,43 @@
-import React from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// (Componentes DayNumber e DayHeader não mudam)
-const DayNumber = ({ day, isCurrentMonth = true, isSelected = false }) => (
-    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-        isSelected ? 'bg-yellow-300 text-black' : (isCurrentMonth ? 'text-gray-900' : 'text-gray-300')
-    } ${isCurrentMonth ? 'font-medium' : ''}`}>
+interface DayNumberProps {
+    day: string;
+    isCurrentMonth?: boolean;
+    isSelected?: boolean;
+}
+
+interface FullMonthViewProps {
+    onClose?: () => void;
+}
+
+const DayNumber = ({ day, isCurrentMonth = true, isSelected = false }: DayNumberProps) => (
+    <div
+        className={`flex h-8 w-8 items-center justify-center rounded-full ${
+            isSelected
+                ? 'bg-yellow-300 text-black'
+                : isCurrentMonth
+                  ? 'text-gray-900'
+                  : 'text-gray-300'
+        } ${isCurrentMonth ? 'font-medium' : ''}`}
+    >
         {day}
     </div>
 );
-const DayHeader = ({ children }) => (
+
+const DayHeader = ({ children }: { children: React.ReactNode }) => (
     <div className="text-center text-sm font-medium text-gray-500">{children}</div>
 );
 
-
-export const FullMonthView = ({ onClose }) => {
+export const FullMonthView = ({ onClose }: FullMonthViewProps) => {
     return (
-        // 1. Adicionado 'h-full flex flex-col'
         <div className="h-full flex flex-col">
-            {/* Cabeçalho (sem alteração) */}
             <div className="flex items-center justify-between mb-4">
                 {onClose ? (
                     <button onClick={onClose} className="p-1 text-gray-600 hover:text-gray-900">
                         <ArrowLeft size={20} />
                     </button>
                 ) : (
-                    <div className="w-8"></div>
+                    <div className="w-8" />
                 )}
                 <div className="flex items-center gap-4">
                     <ChevronLeft size={16} className="text-gray-400 cursor-pointer" />
@@ -37,24 +49,14 @@ export const FullMonthView = ({ onClose }) => {
                 <span className="text-xl font-bold text-gray-900">2024</span>
             </div>
 
-            {/* Grid do Calendário */}
-            {/* 2. Adicionado 'flex-grow flex flex-col' para fazer esta seção crescer */}
             <div className="space-y-3 flex-grow flex flex-col">
-                {/* Headers (sem alteração) */}
                 <div className="grid grid-cols-7 gap-2">
-                    <DayHeader>S</DayHeader>
-                    <DayHeader>M</DayHeader>
-                    <DayHeader>T</DayHeader>
-                    <DayHeader>W</DayHeader>
-                    <DayHeader>T</DayHeader>
-                    <DayHeader>F</DayHeader>
-                    <DayHeader>S</DayHeader>
+                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                        <DayHeader key={i}>{d}</DayHeader>
+                    ))}
                 </div>
 
-                {/* Dias */}
-                {/* 3. Adicionado 'flex-grow' para que as linhas do grid preencham o espaço */}
                 <div className="grid grid-cols-7 gap-y-2 place-items-center flex-grow">
-                    {/* (Conteúdo dos dias não muda) */}
                     <DayNumber day="30" isCurrentMonth={false} />
                     <DayNumber day="1" />
                     <DayNumber day="2" />
@@ -62,7 +64,7 @@ export const FullMonthView = ({ onClose }) => {
                     <DayNumber day="4" />
                     <DayNumber day="5" />
                     <DayNumber day="6" />
-                    
+
                     <DayNumber day="7" />
                     <DayNumber day="8" />
                     <DayNumber day="9" />
@@ -89,7 +91,7 @@ export const FullMonthView = ({ onClose }) => {
 
                     <DayNumber day="28" />
                     <DayNumber day="29" />
-                    <DayNumber day="30" isSelected={true} />
+                    <DayNumber day="30" isSelected />
                     <DayNumber day="31" />
                     <DayNumber day="1" isCurrentMonth={false} />
                     <DayNumber day="2" isCurrentMonth={false} />

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from '@/widgets/Sidebar/Sidebar';
-import { Topbar } from '@/widgets/Topbar/Topbar';
+import { Sidebar } from '@/widgets/Sidebar/sidebar';
+import { Topbar } from '@/widgets/Topbar/topbar';
 import { MapProvider } from '@/context/map-context';
 
 const MainLayout = () => {

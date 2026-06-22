@@ -1,14 +1,29 @@
-import React from 'react';
-import { TaskItem } from './TaskItem';
+import { TaskItem } from '@/features/task/task-item';
 import { Skeleton } from '@/shared/ui/skeleton';
 
-export const TaskList = ({ tasks = [], isLoading = false }) => {
-    
+interface Task {
+    id: string | number;
+    title: string;
+    description?: string;
+    dueDate: string;
+    priority: string;
+    status: string;
+}
+
+interface TaskListProps {
+    tasks?: Task[];
+    isLoading?: boolean;
+}
+
+export const TaskList = ({ tasks = [], isLoading = false }: TaskListProps) => {
     if (isLoading) {
         return (
             <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="rounded-lg p-3 shadow-sm border-l-4 border-gray-200 bg-white">
+                    <div
+                        key={i}
+                        className="rounded-lg p-3 shadow-sm border-l-4 border-gray-200 bg-white"
+                    >
                         <div className="flex justify-between items-start mb-2">
                             <div className="space-y-2 w-3/4">
                                 <Skeleton className="h-5 w-1/2" />
@@ -17,8 +32,8 @@ export const TaskList = ({ tasks = [], isLoading = false }) => {
                             <Skeleton className="h-5 w-16 rounded-full" />
                         </div>
                         <div className="flex gap-4 mt-2">
-                             <Skeleton className="h-4 w-20" />
-                             <Skeleton className="h-4 w-16" />
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-4 w-16" />
                         </div>
                     </div>
                 ))}
@@ -37,7 +52,7 @@ export const TaskList = ({ tasks = [], isLoading = false }) => {
 
     return (
         <div className="space-y-4">
-            {tasks.map(task => (
+            {tasks.map((task) => (
                 <TaskItem key={task.id} task={task} />
             ))}
         </div>

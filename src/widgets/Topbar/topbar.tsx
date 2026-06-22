@@ -1,24 +1,30 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, X, LogOut, User, Shield, Users, CreditCard } from 'lucide-react';
+import { Search, Bell, X, LogOut, User, Shield, Users, CreditCard, LucideIcon } from 'lucide-react';
 import shp from 'shpjs';
 import { useMap } from '@/context/map-context';
-import { useAuth } from '@/context/auth-context.tsx';
+import { useAuth } from '@/context/auth-context';
 import UploadIcon from '@/shared/ui/icons/upload-icon';
+
+interface MenuItem {
+    id: string;
+    label: string;
+    icon: LucideIcon;
+}
 
 export const Topbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { setGeojson } = useMap();
     const { logout, user } = useAuth();
-    
+
     const isMapPage = location.pathname.includes('/farm-map');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    
-    const profileMenuRef = useRef(null);
 
-    const menuItems = [
+    const profileMenuRef = useRef<HTMLDivElement>(null);
+
+    const menuItems: MenuItem[] = [
         { id: 'my-profile', label: 'My Profile', icon: User },
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'team', label: 'Team', icon: Users },
@@ -26,8 +32,8 @@ export const Topbar = () => {
     ];
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
                 setIsProfileOpen(false);
             }
         };
@@ -35,7 +41,7 @@ export const Topbar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleNavigation = (tabId) => {
+    const handleNavigation = (tabId: string) => {
         navigate('/profile', { state: { activeTab: tabId } });
         setIsProfileOpen(false);
     };
@@ -45,26 +51,28 @@ export const Topbar = () => {
         setIsProfileOpen(false);
     };
 
-    const handleFileChange = useCallback(async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    const handleFileChange = useCallback(
+        async (event: React.ChangeEvent<HTMLInputElement>) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const arrayBuffer = e.target.result;
-                const geojson = await shp.parseZip(arrayBuffer);
-                setGeojson(geojson);
-            } catch (error) {
-                console.error("Error parsing shapefile:", error);
-            }
-        };
-        reader.readAsArrayBuffer(file);
-        event.target.value = null; 
-    }, [setGeojson]);
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const arrayBuffer = e.target?.result as ArrayBuffer;
+                    const geojson = await shp.parseZip(arrayBuffer);
+                    setGeojson(geojson as any);
+                } catch (error) {
+                    console.error('Error parsing shapefile:', error);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        },
+        [setGeojson],
+    );
 
     return (
-        /*<header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-6 transition-all duration-200 relative z-20">*/
         <header className="flex h-16 flex-shrink-0 items-center justify-between bg-white px-4 lg:px-6 transition-all duration-200 relative z-[1100]">
             {isSearchOpen ? (
                 <div className="flex w-full items-center gap-2 animate-in fade-in duration-200 justify-center">
@@ -76,11 +84,10 @@ export const Topbar = () => {
                             type="search"
                             autoFocus
                             placeholder="Buscar..."
-                            // onBlur={() => setIsSearchOpen(false)} // Opcional: fechar ao sair do foco
                             className="w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:ring-blue-500 outline-none shadow-sm"
                         />
                     </div>
-                    <button 
+                    <button
                         onClick={() => setIsSearchOpen(false)}
                         className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full flex-shrink-0"
                         title="Fechar busca"
@@ -99,8 +106,8 @@ export const Topbar = () => {
                     <div className="flex items-center space-x-3 lg:space-x-6">
                         {isMapPage && (
                             <>
-                                <label 
-                                    htmlFor="shapefile-upload-topbar" 
+                                <label
+                                    htmlFor="shapefile-upload-topbar"
                                     className="cursor-pointer text-gray-500 hover:text-gray-700 p-1"
                                 >
                                     <UploadIcon className="h-5 w-5 lg:h-6 lg:w-6" />
@@ -115,7 +122,7 @@ export const Topbar = () => {
                             </>
                         )}
 
-                        <button 
+                        <button
                             onClick={() => setIsSearchOpen(true)}
                             className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors"
                             title="Pesquisar"
@@ -123,15 +130,16 @@ export const Topbar = () => {
                             <Search className="h-5 w-5 lg:h-6 lg:w-6" />
                         </button>
 
-                        <button 
+                        <button
                             onClick={() => handleNavigation('notifications')}
                             className="text-gray-500 hover:text-gray-700 p-1 relative hover:bg-gray-50 rounded-full transition-colors"
                             title="Notificações"
                         >
                             <Bell className="h-5 w-5 lg:h-6 lg:w-6" />
                         </button>
+
                         <div className="relative" ref={profileMenuRef}>
-                            <button 
+                            <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                                 className="h-8 w-8 lg:h-9 lg:w-9 overflow-hidden rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
@@ -146,27 +154,24 @@ export const Topbar = () => {
                                 <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none animate-in fade-in zoom-in-95 duration-100">
                                     <div className="px-4 py-3 border-b border-gray-100">
                                         <p className="text-sm font-medium text-gray-900 truncate">
-                                            {user?.name || 'Usuário'}
+                                            {user?.name ?? 'Usuário'}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate">
-                                            {user?.email || 'usuario@email.com'}
+                                            {user?.email ?? 'usuario@email.com'}
                                         </p>
                                     </div>
 
                                     <div className="py-1">
-                                        {menuItems.map((item) => {
-                                            const Icon = item.icon;
-                                            return (
-                                                <button
-                                                    key={item.id}
-                                                    onClick={() => handleNavigation(item.id)}
-                                                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                                >
-                                                    <Icon className="mr-3 h-4 w-4 text-gray-400" />
-                                                    {item.label}
-                                                </button>
-                                            );
-                                        })}
+                                        {menuItems.map(({ id, label, icon: Icon }) => (
+                                            <button
+                                                key={id}
+                                                onClick={() => handleNavigation(id)}
+                                                className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                            >
+                                                <Icon className="mr-3 h-4 w-4 text-gray-400" />
+                                                {label}
+                                            </button>
+                                        ))}
                                     </div>
 
                                     <div className="py-1 border-t border-gray-100">

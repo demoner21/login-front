@@ -1,12 +1,16 @@
-import React from 'react';
+import { ReactNode } from 'react';
 import { MapContainer, TileLayer, ZoomControl, GeoJSON } from 'react-leaflet';
-import { useMap } from '@/context/MapContext';
+import { useMap } from '@/context/map-context';
+import { MapGeoJSON } from '@/types/map';
 
-// Posição inicial (Ex: Brasília)
-const position = [-15.793889, -47.882778];
+const position: [number, number] = [-15.793889, -47.882778];
 const maxZoom = 18;
 
-export const FarmMap = ({ children }) => {
+interface FarmMapProps {
+    children?: ReactNode;
+}
+
+export const FarmMap = ({ children }: FarmMapProps) => {
     const { geojson } = useMap();
 
     return (
@@ -25,14 +29,13 @@ export const FarmMap = ({ children }) => {
                     attribution="Tiles &copy; Esri"
                 />
 
-                {geojson && <GeoJSON key={Date.now()} data={geojson} />}
+                {geojson && <GeoJSON key={Date.now()} data={geojson as MapGeoJSON} />}
 
                 <div style={{ transform: 'rotate(90deg)' }}>
                     <ZoomControl position="bottomright" />
                 </div>
 
                 {children}
-
             </MapContainer>
         </div>
     );

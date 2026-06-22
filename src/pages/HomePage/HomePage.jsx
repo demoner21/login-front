@@ -1,6 +1,6 @@
-import { Navbar } from '@/widgets/Navbar/Navbar';
-import { Newsletter } from '@/widgets/Newsletter/Newsletter';
-import { Footer } from '@/widgets/Footer/Footer';
+import { Navbar } from '@/widgets/Navbar/navbar';
+import { Newsletter } from '@/widgets/Newsletter/newsletter';
+import { Footer } from '@/widgets/Footer/footer';
 
 import { HeroSection } from './components/HeroSection';
 import { AboutUsSection } from './components/AboutUsSection';

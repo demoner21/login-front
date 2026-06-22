@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Pencil, Save, X, Users, Bell, CreditCard, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context.tsx';
-import { SecuritySettings } from '@/features/profile/SecuritySettings';
+import { SecuritySettings } from '@/features/profile/security-settings';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Input } from '@/shared/ui/input';
 

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogoPlaceholder } from '@/shared/ui/logo-placeholder';
-import { useAuth } from '@/context/auth-context.tsx';
+import { useAuth } from '@/context/auth-context';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { PasswordInput } from '@/shared/ui/password-input';
@@ -16,19 +16,19 @@ export const LoginForm = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
         const result = await login(email, password);
-        
+
         if (result.success) {
             navigate('/dashboard');
         } else {
-            setError(result.error);
+            setError(result.error ?? 'Erro ao fazer login');
         }
-        
+
         setIsLoading(false);
     };
 
@@ -76,7 +76,7 @@ export const LoginForm = () => {
                             Lembrar-me
                         </label>
                     </div>
-                    <Link 
+                    <Link
                         to="/forgot-password"
                         className="text-blue-700 hover:text-blue-800 hover:underline"
                     >
@@ -84,17 +84,13 @@ export const LoginForm = () => {
                     </Link>
                 </div>
 
-                <Button
-                    type="submit"
-                    disabled={isLoading}
-                >
+                <Button type="submit" disabled={isLoading}>
                     {isLoading ? 'Entrando...' : 'Entrar'}
                 </Button>
 
                 <p className="text-center text-sm text-gray-600 mt-8">
                     Não tenho conta?{' '}
-                    <Link to="/register"
-                        className="font-semibold text-blue-700 hover:underline">
+                    <Link to="/register" className="font-semibold text-blue-700 hover:underline">
                         Cadastre-se
                     </Link>
                 </p>

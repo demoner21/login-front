@@ -1,27 +1,38 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AlertCircle, CheckCircle, Trash2, AlertTriangle, Shield } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Modal } from '@/shared/ui/modal';
 import { usersAPI } from '@/service/api';
-import { useAuth } from '@/context/auth-context.tsx';
+import { useAuth } from '@/context/auth-context';
 import { PasswordInput } from '@/shared/ui/password-input';
+
+interface PasswordState {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+interface StatusState {
+    type: 'error' | 'success' | '';
+    message: string;
+}
 
 export const SecuritySettings = () => {
     const { user, logout } = useAuth();
-    const [passwords, setPasswords] = useState({
+    const [passwords, setPasswords] = useState<PasswordState>({
         currentPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
     });
-    const [status, setStatus] = useState({ type: '', message: '' });
+    const [status, setStatus] = useState<StatusState>({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPasswords({ ...passwords, [e.target.id]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setStatus({ type: '', message: '' });
 
@@ -38,15 +49,16 @@ export const SecuritySettings = () => {
         try {
             const payload = {
                 current_password: passwords.currentPassword,
-                new_password: passwords.newPassword
+                new_password: passwords.newPassword,
+                confirm_password: passwords.confirmPassword,
             };
-            await usersAPI.changePassword(user.id, payload);
+            await usersAPI.changePassword(user!.id, payload);
             setStatus({ type: 'success', message: 'Senha alterada com sucesso!' });
             setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        } catch (error) {
-            setStatus({ 
-                type: 'error', 
-                message: error.response?.data?.error || 'Erro ao atualizar senha. Verifique sua senha atual.' 
+        } catch (error: any) {
+            setStatus({
+                type: 'error',
+                message: error.response?.data?.error || 'Erro ao atualizar senha. Verifique sua senha atual.',
             });
         } finally {
             setIsLoading(false);
@@ -56,13 +68,13 @@ export const SecuritySettings = () => {
     const handleDeleteAccount = async () => {
         setIsLoading(true);
         try {
-            await usersAPI.delete(user.id);
+            await usersAPI.delete(user!.id);
             setIsDeleteModalOpen(false);
             logout();
-        } catch (error) {
-            setStatus({ 
-                type: 'error', 
-                message: error.response?.data?.error || 'Erro ao excluir conta.' 
+        } catch (error: any) {
+            setStatus({
+                type: 'error',
+                message: error.response?.data?.error || 'Erro ao excluir conta.',
             });
             setIsDeleteModalOpen(false);
         } finally {
@@ -73,7 +85,6 @@ export const SecuritySettings = () => {
     return (
         <>
             <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 animate-in fade-in">
-                
                 <div className="p-6 border-b border-gray-100">
                     <div className="flex items-center gap-4">
                         <div className="p-2.5 bg-blue-50 rounded-lg hidden sm:block">
@@ -90,10 +101,18 @@ export const SecuritySettings = () => {
 
                 {status.message && (
                     <div className="px-6 pt-6">
-                        <div className={`p-3 rounded-lg flex items-center gap-3 ${
-                            status.type === 'error' ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-green-50 text-green-700 border border-green-100'
-                        }`}>
-                            {status.type === 'error' ? <AlertCircle size={18} className="shrink-0"/> : <CheckCircle size={18} className="shrink-0"/>}
+                        <div
+                            className={`p-3 rounded-lg flex items-center gap-3 ${
+                                status.type === 'error'
+                                    ? 'bg-red-50 text-red-700 border border-red-100'
+                                    : 'bg-green-50 text-green-700 border border-green-100'
+                            }`}
+                        >
+                            {status.type === 'error' ? (
+                                <AlertCircle size={18} className="shrink-0" />
+                            ) : (
+                                <CheckCircle size={18} className="shrink-0" />
+                            )}
                             <span className="text-sm font-medium">{status.message}</span>
                         </div>
                     </div>
@@ -101,7 +120,6 @@ export const SecuritySettings = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="p-6 space-y-6">
-                        {/* Grid Senha Atual */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <PasswordInput
                                 id="currentPassword"
@@ -112,7 +130,7 @@ export const SecuritySettings = () => {
                                 placeholder="Digite sua senha atual"
                             />
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <PasswordInput
                                 id="newPassword"
@@ -132,9 +150,9 @@ export const SecuritySettings = () => {
                             />
                         </div>
                     </div>
+
                     <div className="px-6 pb-6 pt-2">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-                            
                             <div className="w-full md:w-auto md:order-1">
                                 <Button type="submit" disabled={isLoading} className="w-full md:w-auto px-6">
                                     {isLoading ? 'Salvando...' : 'Atualizar Senha'}
@@ -149,22 +167,24 @@ export const SecuritySettings = () => {
                                 <Trash2 size={16} />
                                 Excluir conta
                             </button>
-
                         </div>
                     </div>
                 </form>
             </div>
 
             <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
-                 <div className="text-center p-2">
+                <div className="text-center p-2">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                         <AlertTriangle className="h-6 w-6 text-red-600" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Excluir Conta Definitivamente?</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        Excluir Conta Definitivamente?
+                    </h3>
                     <p className="text-sm text-gray-500 mb-6">
-                        Esta ação apagará todos os seus dados e não poderá ser desfeita. Você perderá acesso imediato à plataforma.
+                        Esta ação apagará todos os seus dados e não poderá ser desfeita. Você perderá acesso
+                        imediato à plataforma.
                     </p>
-                    
+
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
                             onClick={() => setIsDeleteModalOpen(false)}
