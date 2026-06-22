@@ -1,13 +1,75 @@
 import { useEffect, useState, useRef } from 'react';
 import { useMap } from 'react-leaflet';
+import L from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 
-export const GeomanControls = ({ onShapeCreated, onShapeEdited, onShapeRemoved }) => {
+// O leaflet-geoman-free não publica tipos oficiais.
+// Aqui estendemos o L.Map com a API do `.pm` que usamos neste componente.
+declare module 'leaflet' {
+    interface PM {
+        addControls: (options: Record<string, unknown>) => void;
+        removeControls: () => void;
+        controlsVisible: () => boolean;
+        setGlobalOptions: (options: Record<string, unknown>) => void;
+        getToolbar: () => HTMLElement | null;
+    }
+
+    interface Map {
+        pm: PM;
+    }
+
+    interface Layer {
+        pm?: unknown;
+    }
+}
+
+type PmShape = 'Polygon' | 'Rectangle' | 'Circle' | string;
+
+interface PmCreateEvent {
+    layer: L.Layer & {
+        getLatLngs?: () => L.LatLng[] | L.LatLng[][] | L.LatLng[][][];
+        getLatLng?: () => L.LatLng;
+        getRadius?: () => number;
+    };
+    shape: PmShape;
+}
+
+interface PmEditEvent {
+    layer: L.Layer;
+}
+
+interface PmRemoveEvent {
+    layer: L.Layer;
+}
+
+export interface ShapeCreatedPayload {
+    shape: PmShape;
+    layer: L.Layer;
+    latlngs?: L.LatLng[] | L.LatLng[][] | L.LatLng[][][];
+    center?: L.LatLng;
+    radius?: number;
+}
+
+export interface ShapeEditedPayload {
+    layer: L.Layer;
+}
+
+export interface ShapeRemovedPayload {
+    layer: L.Layer;
+}
+
+interface GeomanControlsProps {
+    onShapeCreated?: (payload: ShapeCreatedPayload) => void;
+    onShapeEdited?: (payload: ShapeEditedPayload) => void;
+    onShapeRemoved?: (payload: ShapeRemovedPayload) => void;
+}
+
+export const GeomanControls = ({ onShapeCreated, onShapeEdited, onShapeRemoved }: GeomanControlsProps) => {
     const map = useMap();
     const [isMobile, setIsMobile] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const toolbarRef = useRef(null);
+    const toolbarRef = useRef<HTMLElement | null>(null);
 
     // Efeito para detectar o tamanho da tela
     useEffect(() => {
@@ -60,7 +122,7 @@ export const GeomanControls = ({ onShapeCreated, onShapeEdited, onShapeRemoved }
                 toggleButton.className = 'leaflet-buttons-control-button leaflet-pm-btn-toggle';
                 toggleButton.innerHTML = '<div class="control-icon"></div>';
                 toggleButton.title = 'Ferramentas de Desenho';
-                toggleButton.onclick = (e) => {
+                toggleButton.onclick = (e: MouseEvent) => {
                     e.stopPropagation(); // Evita que o clique se propague para o mapa
                     setIsExpanded(prev => !prev);
                 };
@@ -68,27 +130,27 @@ export const GeomanControls = ({ onShapeCreated, onShapeEdited, onShapeRemoved }
             }
         }
 
-        const handleCreate = (e) => {
+        const handleCreate = (e: PmCreateEvent) => {
             const { layer, shape } = e;
             if (shape === 'Polygon' || shape === 'Rectangle') {
-                onShapeCreated?.({ shape, latlngs: layer.getLatLngs(), layer });
+                onShapeCreated?.({ shape, latlngs: layer.getLatLngs?.(), layer });
             } else if (shape === 'Circle') {
-                onShapeCreated?.({ shape, center: layer.getLatLng(), radius: layer.getRadius(), layer });
+                onShapeCreated?.({ shape, center: layer.getLatLng?.(), radius: layer.getRadius?.(), layer });
             }
             setIsExpanded(false); // Fecha o menu após desenhar
         };
 
-        const handleEdit = (e) => onShapeEdited?.({ layer: e.layer });
-        const handleRemove = (e) => onShapeRemoved?.({ layer: e.layer });
+        const handleEdit = (e: PmEditEvent) => onShapeEdited?.({ layer: e.layer });
+        const handleRemove = (e: PmRemoveEvent) => onShapeRemoved?.({ layer: e.layer });
 
-        map.on('pm:create', handleCreate);
-        map.on('pm:edit', handleEdit);
-        map.on('pm:remove', handleRemove);
+        map.on('pm:create', handleCreate as L.LeafletEventHandlerFn);
+        map.on('pm:edit', handleEdit as L.LeafletEventHandlerFn);
+        map.on('pm:remove', handleRemove as L.LeafletEventHandlerFn);
 
         return () => {
-            map.off('pm:create', handleCreate);
-            map.off('pm:edit', handleEdit);
-            map.off('pm:remove', handleRemove);
+            map.off('pm:create', handleCreate as L.LeafletEventHandlerFn);
+            map.off('pm:edit', handleEdit as L.LeafletEventHandlerFn);
+            map.off('pm:remove', handleRemove as L.LeafletEventHandlerFn);
             if (map.pm.controlsVisible()) { // Use controlsVisible() para verificar
                 map.pm.removeControls();
             }
