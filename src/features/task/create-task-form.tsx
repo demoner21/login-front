@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Calendar, Clock, AlertCircle } from 'lucide-react';
+import { AlertCircle, Users } from 'lucide-react'; // Calendar e Clock removidos
 import { tasksAPI } from '@/service/api';
 import { Task } from '@/types/task';
 
@@ -13,6 +13,7 @@ interface FormErrors {
     title?: string;
     date?: string;
     time?: string;
+    sharedEmails?: string;
 }
 
 type Priority = 'High' | 'Medium' | 'Low';
@@ -25,6 +26,7 @@ export const CreateTaskForm = ({ onClose, onCreated }: CreateTaskFormProps) => {
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [priority, setPriority] = useState<Priority>('High');
+    const [sharedEmails, setSharedEmails] = useState('');
     const [errors, setErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,6 +35,16 @@ export const CreateTaskForm = ({ onClose, onCreated }: CreateTaskFormProps) => {
         if (!title || title.trim().length < 3) newErrors.title = 'O nome da tarefa precisa ter ao menos 3 caracteres.';
         if (!date) newErrors.date = 'A data é obrigatória.';
         if (!time) newErrors.time = 'A hora é obrigatória.';
+        
+        if (sharedEmails) {
+            const emails = sharedEmails.split(',').map(e => e.trim());
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const invalidEmails = emails.filter(e => e.length > 0 && !emailRegex.test(e));
+            if (invalidEmails.length > 0) {
+                newErrors.sharedEmails = 'Um ou mais e-mails são inválidos.';
+            }
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -45,15 +57,30 @@ export const CreateTaskForm = ({ onClose, onCreated }: CreateTaskFormProps) => {
         try {
             const due_date = new Date(`${date}T${time}`).toISOString();
 
+            const emailsArray = sharedEmails
+                .split(',')
+                .map((e) => e.trim())
+                .filter((e) => e.length > 0);
+
             const response = await tasksAPI.create({
                 title: title.trim(),
                 description: description.trim() || undefined,
                 priority,
                 due_date,
+                ...(emailsArray.length > 0 && { shared_with: emailsArray }),
             });
 
+            const { task, share_warnings } = response.data;
+
             toast.success('Tarefa criada com sucesso!');
-            onCreated(response.data);
+
+            if (share_warnings && share_warnings.length > 0) {
+                toast.warning('Alguns compartilhamentos não foram concluídos', {
+                    description: share_warnings.join(' • '),
+                });
+            }
+
+            onCreated(task);
             onClose();
         } catch (err: any) {
             toast.error('Erro ao criar tarefa', {
@@ -116,7 +143,6 @@ export const CreateTaskForm = ({ onClose, onCreated }: CreateTaskFormProps) => {
                             onChange={(e) => setDate(e.target.value)}
                             className={`w-full px-3 py-2 border rounded-md shadow-sm outline-none focus:ring-1 ${getErrorClass('date')}`}
                         />
-                        {!date && <Calendar size={16} className="absolute right-3 top-2.5 text-gray-400" />}
                     </div>
                     {errors.date && <p className="mt-1 text-xs text-red-600">{errors.date}</p>}
                 </div>
@@ -130,10 +156,28 @@ export const CreateTaskForm = ({ onClose, onCreated }: CreateTaskFormProps) => {
                             onChange={(e) => setTime(e.target.value)}
                             className={`w-full px-3 py-2 border rounded-md shadow-sm outline-none focus:ring-1 ${getErrorClass('time')}`}
                         />
-                        {!time && <Clock size={16} className="absolute right-3 top-2.5 text-gray-400" />}
                     </div>
                     {errors.time && <p className="mt-1 text-xs text-red-600">{errors.time}</p>}
                 </div>
+            </div>
+            
+            <div className="mb-4">
+                <label htmlFor="sharedEmails" className="block text-sm font-medium text-gray-700 mb-1">
+                    Compartilhar com (E-mails separados por vírgula)
+                </label>
+                <div className="relative">
+                    <input
+                        type="text"
+                        id="sharedEmails"
+                        value={sharedEmails}
+                        onChange={(e) => setSharedEmails(e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-md shadow-sm outline-none focus:ring-1 pl-9 ${getErrorClass('sharedEmails')}`}
+                        placeholder="exemplo@email.com, outro@email.com"
+                    />
+                    <Users size={16} className="absolute left-3 top-3 text-gray-400" />
+                    {errors.sharedEmails && <AlertCircle size={16} className="absolute right-3 top-2.5 text-red-500" />}
+                </div>
+                {errors.sharedEmails && <p className="mt-1 text-xs text-red-600">{errors.sharedEmails}</p>}
             </div>
 
             <div className="mb-6">

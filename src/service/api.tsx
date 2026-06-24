@@ -6,7 +6,9 @@ import axios, {
   AxiosError 
 } from 'axios';
 
-import { Task, CreateTaskRequest, UpdateTaskRequest } from '@/types/task';
+import { Task, CreateTaskRequest, UpdateTaskRequest, CreateTaskResult  } from '@/types/task';
+import { ACL, GrantACLRequest } from '@/types/acl';
+
 
 // ============ TIPOS BASEADOS NA SUA API ============
 
@@ -261,14 +263,51 @@ export const tasksAPI = {
   list: (): Promise<ApiResponse<Task[]>> =>
     api.get<ApiResponse<Task[]>>('/tasks').then((r) => r.data),
 
-  create: (data: CreateTaskRequest): Promise<ApiResponse<Task>> =>
-    api.post<ApiResponse<Task>>('/tasks', data).then((r) => r.data),
+  create: (data: CreateTaskRequest): Promise<ApiResponse<CreateTaskResult>> =>
+    api.post<ApiResponse<CreateTaskResult>>('/tasks', data).then((r) => r.data),
 
   update: (id: string, data: UpdateTaskRequest): Promise<ApiResponse<Task>> =>
     api.put<ApiResponse<Task>>(`/tasks/${id}`, data).then((r) => r.data),
 
   delete: (id: string): Promise<ApiResponse<void>> =>
     api.delete<ApiResponse<void>>(`/tasks/${id}`).then((r) => r.data),
+};
+
+export interface UserSearchResult {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export const usersSearchAPI = {
+  search: (email: string): Promise<ApiResponse<UserSearchResult[]>> =>
+    api.get<ApiResponse<UserSearchResult[]>>('/users/search', { params: { q: email } }).then((r) => r.data),
+};
+
+export const aclAPI = {
+  grant: (req: GrantACLRequest): Promise<ApiResponse<void>> =>
+    api.post<ApiResponse<void>>('/acl', req).then((r) => r.data),
+
+  getForResource: (resourceId: string, resourceType: string): Promise<ApiResponse<ACL[]>> =>
+    api.get<ApiResponse<ACL[]>>(`/acl/${resourceId}`, { params: { resource_type: resourceType } }).then((r) => r.data),
+
+  revoke: (
+    resourceId: string,
+    resourceType: string,
+    granteeType: string,
+    granteeId?: string,
+  ): Promise<ApiResponse<void>> =>
+    api
+      .delete<ApiResponse<void>>(`/acl/${resourceId}`, {
+        params: { resource_type: resourceType, grantee_type: granteeType, grantee_id: granteeId },
+      })
+      .then((r) => r.data),
+
+  sharedWithMe: (resourceType?: string): Promise<ApiResponse<any[]>> =>
+    api.get<ApiResponse<any[]>>('/acl/shared-with-me', { params: { resource_type: resourceType } }).then((r) => r.data),
+
+  sharedByMe: (resourceType?: string): Promise<ApiResponse<any[]>> =>
+    api.get<ApiResponse<any[]>>('/acl/shared-by-me', { params: { resource_type: resourceType } }).then((r) => r.data),
 };
 
 export default api;
