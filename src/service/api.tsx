@@ -6,6 +6,8 @@ import axios, {
   AxiosError 
 } from 'axios';
 
+import { Task, CreateTaskRequest, UpdateTaskRequest } from '@/types/task';
+
 // ============ TIPOS BASEADOS NA SUA API ============
 
 // Resposta de login/refresh - baseado no seu JSON
@@ -187,13 +189,13 @@ api.interceptors.response.use(
 // ============ API DE AUTENTICAÇÃO ============
 
 export const authAPI = {
-  login: (email: string, password: string): Promise<AxiosResponse<ApiResponse<AuthResponseData>>> => 
-    api.post<ApiResponse<AuthResponseData>>('/auth/login', { email, password }),
-  
-  refreshToken: (): Promise<AxiosResponse<ApiResponse<AuthResponseData>>> => 
-    api.post<ApiResponse<AuthResponseData>>('/auth/refresh'),
-  
-  logout: (): Promise<AxiosResponse> => 
+  login: (email: string, password: string): Promise<ApiResponse<AuthResponseData>> =>
+    api.post<ApiResponse<AuthResponseData>>('/auth/login', { email, password }).then((r) => r.data),
+
+  refreshToken: (): Promise<ApiResponse<AuthResponseData>> =>
+    api.post<ApiResponse<AuthResponseData>>('/auth/refresh').then((r) => r.data),
+
+  logout: (): Promise<AxiosResponse> =>
     api.post('/auth/logout'),
 };
 
@@ -201,39 +203,38 @@ export const authAPI = {
 
 export const usersAPI = {
   // Criar usuário
-  create: (userData: UserCreateData): Promise<AxiosResponse<ApiResponse<User>>> => 
-    api.post<ApiResponse<User>>('/users', userData),
-  
+  create: (userData: UserCreateData): Promise<ApiResponse<User>> =>
+    api.post<ApiResponse<User>>('/users', userData).then((r) => r.data),
+
   // Listar usuários
-  list: (): Promise<AxiosResponse<ApiResponse<User[]>>> => 
-    api.get<ApiResponse<User[]>>('/users'),
-  
+  list: (): Promise<ApiResponse<User[]>> =>
+    api.get<ApiResponse<User[]>>('/users').then((r) => r.data),
+
   // Buscar por ID
-  getById: (id: string): Promise<AxiosResponse<ApiResponse<User>>> => 
-    api.get<ApiResponse<User>>(`/users/${id}`),
-  
+  getById: (id: string): Promise<ApiResponse<User>> =>
+    api.get<ApiResponse<User>>(`/users/${id}`).then((r) => r.data),
+
   // Atualizar usuário
-  update: (id: string, userData: UserUpdateData): Promise<AxiosResponse<ApiResponse<User>>> => 
-    api.put<ApiResponse<User>>(`/users/${id}`, userData),
-  
+  update: (id: string, userData: UserUpdateData): Promise<ApiResponse<User>> =>
+    api.put<ApiResponse<User>>(`/users/${id}`, userData).then((r) => r.data),
+
   // Deletar usuário
-  delete: (id: string): Promise<AxiosResponse<ApiResponse<void>>> => 
-    api.delete<ApiResponse<void>>(`/users/${id}`),
-  
+  delete: (id: string): Promise<ApiResponse<void>> =>
+    api.delete<ApiResponse<void>>(`/users/${id}`).then((r) => r.data),
+
   // Alterar senha
-  changePassword: (id: string, passwordData: PasswordChangeData): Promise<AxiosResponse<ApiResponse<void>>> => 
-    api.post<ApiResponse<void>>(`/users/${id}/change-password`, passwordData),
-  
+  changePassword: (id: string, passwordData: PasswordChangeData): Promise<ApiResponse<void>> =>
+    api.post<ApiResponse<void>>(`/users/${id}/change-password`, passwordData).then((r) => r.data),
+
   // Upload de avatar
-  uploadAvatar: (id: string, file: File): Promise<AxiosResponse<ApiResponse<User>>> => {
+  uploadAvatar: (id: string, file: File): Promise<ApiResponse<User>> => {
     const formData = new FormData();
     formData.append('avatar', file);
-
-    return api.post<ApiResponse<User>>(`/users/${id}/avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    return api
+      .post<ApiResponse<User>>(`/users/${id}/avatar`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data);
   },
 };
 
@@ -250,6 +251,24 @@ export const testConnection = async (): Promise<{ success: boolean; data?: any; 
       error: `Backend offline: ${axiosError.message}` 
     };
   }
+};
+
+export const tasksAPI = {
+  // ⚠️ Hoje retorna só tarefas onde owner_id = usuário logado.
+  // Quando o módulo de Times existir, o repository.List() do backend
+  // precisa virar um UNION com "shared-with-me" (ACL) para o time
+  // ver o que foi compartilhado. Ver features/tasks/repository.go::List
+  list: (): Promise<ApiResponse<Task[]>> =>
+    api.get<ApiResponse<Task[]>>('/tasks').then((r) => r.data),
+
+  create: (data: CreateTaskRequest): Promise<ApiResponse<Task>> =>
+    api.post<ApiResponse<Task>>('/tasks', data).then((r) => r.data),
+
+  update: (id: string, data: UpdateTaskRequest): Promise<ApiResponse<Task>> =>
+    api.put<ApiResponse<Task>>(`/tasks/${id}`, data).then((r) => r.data),
+
+  delete: (id: string): Promise<ApiResponse<void>> =>
+    api.delete<ApiResponse<void>>(`/tasks/${id}`).then((r) => r.data),
 };
 
 export default api;

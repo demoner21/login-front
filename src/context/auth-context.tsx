@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Login com email/senha - EXATAMENTE como seu tipo define
     const login = useCallback(async (email: string, password: string): Promise<ApiResponse<AuthResponse>> => {
         try {
-            const response = await authAPI.login(email, password) as ApiResponse<AuthResponse>;
+            const response = await authAPI.login(email, password) as ApiResponse<AuthResponseData>;
             const { access_token, user } = response.data;
 
             // Configura token
