@@ -1,29 +1,20 @@
+import { Task } from '@/types/task';
 import { TaskItem } from '@/features/task/task-item';
 import { Skeleton } from '@/shared/ui/skeleton';
-
-interface Task {
-    id: string | number;
-    title: string;
-    description?: string;
-    dueDate: string;
-    priority: string;
-    status: string;
-}
 
 interface TaskListProps {
     tasks?: Task[];
     isLoading?: boolean;
+    onDelete?: (taskId: string) => void;
+    onToggleDone?: (task: Task) => void;
 }
 
-export const TaskList = ({ tasks = [], isLoading = false }: TaskListProps) => {
+export const TaskList = ({ tasks = [], isLoading = false, onDelete, onToggleDone }: TaskListProps) => {
     if (isLoading) {
         return (
             <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                    <div
-                        key={i}
-                        className="rounded-lg p-3 shadow-sm border-l-4 border-gray-200 bg-white"
-                    >
+                    <div key={i} className="rounded-lg p-3 shadow-sm border-l-4 border-gray-200 bg-white">
                         <div className="flex justify-between items-start mb-2">
                             <div className="space-y-2 w-3/4">
                                 <Skeleton className="h-5 w-1/2" />
@@ -53,7 +44,7 @@ export const TaskList = ({ tasks = [], isLoading = false }: TaskListProps) => {
     return (
         <div className="space-y-4">
             {tasks.map((task) => (
-                <TaskItem key={task.id} task={task} />
+                <TaskItem key={task.id} task={task} onDelete={onDelete} onToggleDone={onToggleDone} />
             ))}
         </div>
     );

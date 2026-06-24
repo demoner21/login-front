@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Calendar, Clock, AlertCircle } from 'lucide-react';
+import { tasksAPI } from '@/service/api';
+import { Task } from '@/types/task';
 
 interface CreateTaskFormProps {
     onClose: () => void;
+    onCreated: (task: Task) => void;
 }
 
 interface FormErrors {
@@ -13,28 +17,50 @@ interface FormErrors {
 
 type Priority = 'High' | 'Medium' | 'Low';
 
-export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
+const priorityLabels: Record<Priority, string> = { High: 'Alta', Medium: 'Média', Low: 'Baixa' };
+
+export const CreateTaskForm = ({ onClose, onCreated }: CreateTaskFormProps) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [priority, setPriority] = useState<Priority>('High');
     const [errors, setErrors] = useState<FormErrors>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const validate = (): boolean => {
         const newErrors: FormErrors = {};
-        if (!title) newErrors.title = 'O nome da tarefa é obrigatório.';
+        if (!title || title.trim().length < 3) newErrors.title = 'O nome da tarefa precisa ter ao menos 3 caracteres.';
         if (!date) newErrors.date = 'A data é obrigatória.';
         if (!time) newErrors.time = 'A hora é obrigatória.';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (validate()) {
-            console.log('Nova Tarefa:', { title, description, date, time, priority });
+        if (!validate()) return;
+
+        setIsSubmitting(true);
+        try {
+            const due_date = new Date(`${date}T${time}`).toISOString();
+
+            const response = await tasksAPI.create({
+                title: title.trim(),
+                description: description.trim() || undefined,
+                priority,
+                due_date,
+            });
+
+            toast.success('Tarefa criada com sucesso!');
+            onCreated(response.data);
             onClose();
+        } catch (err: any) {
+            toast.error('Erro ao criar tarefa', {
+                description: err.response?.data?.error || 'Tente novamente mais tarde.',
+            });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -47,7 +73,6 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
         <form onSubmit={handleSubmit}>
             <h2 className="text-xl font-semibold mb-6 text-gray-900">Add a Task</h2>
 
-            {/* Título */}
             <div className="mb-4">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                     Nome da Tarefa
@@ -61,14 +86,11 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
                         className={`w-full px-3 py-2 border rounded-md shadow-sm outline-none focus:ring-1 ${getErrorClass('title')}`}
                         placeholder="Enter task name"
                     />
-                    {errors.title && (
-                        <AlertCircle size={16} className="absolute right-3 top-2.5 text-red-500" />
-                    )}
+                    {errors.title && <AlertCircle size={16} className="absolute right-3 top-2.5 text-red-500" />}
                 </div>
                 {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title}</p>}
             </div>
 
-            {/* Descrição */}
             <div className="mb-4">
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                     Descrição (Opcional)
@@ -83,12 +105,9 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
                 />
             </div>
 
-            {/* Data e Hora */}
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                        Data
-                    </label>
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">Data</label>
                     <div className="relative">
                         <input
                             type="date"
@@ -97,16 +116,12 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
                             onChange={(e) => setDate(e.target.value)}
                             className={`w-full px-3 py-2 border rounded-md shadow-sm outline-none focus:ring-1 ${getErrorClass('date')}`}
                         />
-                        {!date && (
-                            <Calendar size={16} className="absolute right-3 top-2.5 text-gray-400" />
-                        )}
+                        {!date && <Calendar size={16} className="absolute right-3 top-2.5 text-gray-400" />}
                     </div>
                     {errors.date && <p className="mt-1 text-xs text-red-600">{errors.date}</p>}
                 </div>
                 <div>
-                    <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
-                        Hora
-                    </label>
+                    <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
                     <div className="relative">
                         <input
                             type="time"
@@ -115,15 +130,12 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
                             onChange={(e) => setTime(e.target.value)}
                             className={`w-full px-3 py-2 border rounded-md shadow-sm outline-none focus:ring-1 ${getErrorClass('time')}`}
                         />
-                        {!time && (
-                            <Clock size={16} className="absolute right-3 top-2.5 text-gray-400" />
-                        )}
+                        {!time && <Clock size={16} className="absolute right-3 top-2.5 text-gray-400" />}
                     </div>
                     {errors.time && <p className="mt-1 text-xs text-red-600">{errors.time}</p>}
                 </div>
             </div>
 
-            {/* Prioridade */}
             <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Set priority</label>
                 <div className="flex space-x-4">
@@ -137,10 +149,8 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
                                 onChange={(e) => setPriority(e.target.value as Priority)}
                                 className="h-4 w-4 text-blue-700 focus:ring-blue-600"
                             />
-                            <span
-                                className={`text-sm font-medium ${priority === p ? 'text-gray-900' : 'text-gray-600'}`}
-                            >
-                                {p}
+                            <span className={`text-sm font-medium ${priority === p ? 'text-gray-900' : 'text-gray-600'}`}>
+                                {priorityLabels[p]}
                             </span>
                         </label>
                     ))}
@@ -149,9 +159,10 @@ export const CreateTaskForm = ({ onClose }: CreateTaskFormProps) => {
 
             <button
                 type="submit"
-                className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition duration-300 shadow-md flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full bg-blue-900 hover:bg-blue-800 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition duration-300 shadow-md flex items-center justify-center gap-2"
             >
-                Add
+                {isSubmitting ? 'Salvando...' : 'Add'}
             </button>
         </form>
     );
