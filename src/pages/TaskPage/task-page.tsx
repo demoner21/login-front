@@ -6,8 +6,10 @@ import { WeekScrollerView } from '@/features/task/week-scroller-view';
 import { FullMonthView } from '@/features/task/full-month-view';
 import { CreateTaskForm } from '@/features/task/create-task-form';
 import { TaskList } from '@/features/task/task-list';
+import { ShareTaskModal } from '@/features/task/share-task-modal';
 import { tasksAPI } from '@/service/api';
 import { Task } from '@/types/task';
+import { useTaskSocket } from '@/hooks/use-task-socket';
 import { toDateKey, isSameDay } from '@/shared/lib/calendar';
 import { Plus } from 'lucide-react';
 
@@ -17,6 +19,10 @@ const TaskPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMonthModalOpen, setIsMonthModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    
+    // Novos estados de filtro e modal de compartilhamento
+    const [filter, setFilter] = useState<'all' | 'mine' | 'shared'>('all');
+    const [shareModalTask, setShareModalTask] = useState<Task | null>(null);
 
     const fetchTasks = useCallback(async () => {
         setIsLoading(true);
@@ -29,6 +35,27 @@ const TaskPage = () => {
             setIsLoading(false);
         }
     }, []);
+
+    useTaskSocket({
+        onTaskCreated: (taskId) => {
+            // Outra sessão (ou colaborador) criou algo — evita duplicar
+            // se já estiver na lista, senão recarrega.
+            setTasks((prev) => (prev.some((t) => t.id === taskId) ? prev : prev));
+            fetchTasks();
+        },
+        onTaskUpdated: (taskId, payload) => {
+            setTasks((prev) =>
+                prev.map((t) => (t.id === taskId ? { ...t, ...(payload as Partial<Task>) } : t)),
+            );
+        },
+        onTaskDeleted: (taskId) => {
+            setTasks((prev) => prev.filter((t) => t.id !== taskId));
+        },
+        onTaskShared: () => {
+            toast.info('Uma tarefa foi compartilhada com você');
+            fetchTasks();
+        },
+    });
 
     useEffect(() => {
         fetchTasks();
@@ -56,18 +83,26 @@ const TaskPage = () => {
         }
     };
 
-    // Datas que têm ao menos 1 tarefa — usado para marcar bolinhas no calendário
+    // Derivar lista filtrada
+    const filteredTasks = useMemo(() => {
+        if (filter === 'mine') return tasks.filter((t) => t.is_owner);
+        if (filter === 'shared') return tasks.filter((t) => !t.is_owner);
+        return tasks;
+    }, [tasks, filter]);
+
+    // Datas que têm ao menos 1 tarefa — agora usando `filteredTasks`
     const taskDates = useMemo(() => {
         const set = new Set<string>();
-        tasks.forEach((t) => {
+        filteredTasks.forEach((t) => {
             if (t.due_date) set.add(toDateKey(new Date(t.due_date)));
         });
         return set;
-    }, [tasks]);
+    }, [filteredTasks]);
 
+    // Tarefas para o dia selecionado — agora usando `filteredTasks`
     const tasksForSelectedDate = useMemo(
-        () => tasks.filter((task) => task.due_date && isSameDay(new Date(task.due_date), selectedDate)),
-        [tasks, selectedDate],
+        () => filteredTasks.filter((task) => task.due_date && isSameDay(new Date(task.due_date), selectedDate)),
+        [filteredTasks, selectedDate],
     );
 
     const isToday = isSameDay(selectedDate, new Date());
@@ -91,11 +126,28 @@ const TaskPage = () => {
                         <h2 className="text-xl font-semibold mb-4 text-gray-900">
                             {isToday ? 'Tarefas de Hoje' : `Tarefas de ${selectedDate.toLocaleDateString('pt-BR')}`}
                         </h2>
+                        
+                        {/* Barra de Filtros */}
+                        <div className="flex gap-2 mb-4">
+                            {(['all', 'mine', 'shared'] as const).map((f) => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+                                        filter === f ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {f === 'all' ? 'Todas' : f === 'mine' ? 'Minhas' : 'Compartilhadas comigo'}
+                                </button>
+                            ))}
+                        </div>
+
                         <TaskList
                             tasks={tasksForSelectedDate}
                             isLoading={isLoading}
                             onDelete={handleDelete}
                             onToggleDone={handleToggleDone}
+                            onShare={setShareModalTask}
                         />
 
                         <button
@@ -137,6 +189,11 @@ const TaskPage = () => {
                     }}
                     taskDates={taskDates}
                 />
+            </Modal>
+
+            {/* Modal de Compartilhamento */}
+            <Modal isOpen={!!shareModalTask} onClose={() => setShareModalTask(null)}>
+                {shareModalTask && <ShareTaskModal task={shareModalTask} onClose={() => setShareModalTask(null)} />}
             </Modal>
         </div>
     );
