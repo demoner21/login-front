@@ -1,10 +1,11 @@
-import { Calendar, Tag, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Calendar, Tag, Trash2, CheckCircle2, Circle, Share2, Users } from 'lucide-react';
 import { Task } from '@/types/task';
 
 interface TaskItemProps {
     task: Task;
     onDelete?: (taskId: string) => void;
     onToggleDone?: (task: Task) => void;
+    onShare?: (task: Task) => void;
 }
 
 const priorityStyles: Record<Task['priority'], string> = {
@@ -33,7 +34,7 @@ const statusLabels: Record<Task['status'], string> = {
     Canceled: 'Cancelada',
 };
 
-export const TaskItem = ({ task, onDelete, onToggleDone }: TaskItemProps) => {
+export const TaskItem = ({ task, onDelete, onToggleDone, onShare }: TaskItemProps) => {
     const priorityClass = priorityStyles[task.priority] ?? 'border-gray-300 bg-gray-50';
     const statusClass = statusStyles[task.status] ?? 'text-gray-600 bg-gray-200';
     const isDone = task.status === 'Done';
@@ -56,11 +57,18 @@ export const TaskItem = ({ task, onDelete, onToggleDone }: TaskItemProps) => {
                         </button>
                     )}
                     <div className="min-w-0">
-                        <h3
-                            className={`text-base font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-gray-900'}`}
-                        >
-                            {task.title}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                            <h3
+                                className={`text-base font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-gray-900'}`}
+                            >
+                                {task.title}
+                            </h3>
+                            {!task.is_owner && (
+                                <span className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">
+                                    <Users size={11} /> Compartilhada
+                                </span>
+                            )}
+                        </div>
                         {task.description && (
                             <p className="text-sm text-gray-600 truncate">{task.description}</p>
                         )}
@@ -71,7 +79,18 @@ export const TaskItem = ({ task, onDelete, onToggleDone }: TaskItemProps) => {
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statusClass}`}>
                         {statusLabels[task.status]}
                     </span>
-                    {onDelete && (
+                    
+                    {task.is_owner && onShare && (
+                        <button
+                            onClick={() => onShare(task)}
+                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                            title="Compartilhar tarefa"
+                        >
+                            <Share2 size={16} />
+                        </button>
+                    )}
+                    
+                    {onDelete && task.is_owner && (
                         <button
                             onClick={() => onDelete(task.id)}
                             className="text-gray-400 hover:text-red-600 transition-colors"

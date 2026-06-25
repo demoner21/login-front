@@ -24,6 +24,13 @@ const TaskPage = () => {
     const [filter, setFilter] = useState<'all' | 'mine' | 'shared'>('all');
     const [shareModalTask, setShareModalTask] = useState<Task | null>(null);
 
+    // filtrar antes de calcular tasksForSelectedDate/taskDates
+    const visibleTasks = useMemo(() => {
+        if (filter === 'mine') return tasks.filter((t) => t.is_owner);
+        if (filter === 'shared') return tasks.filter((t) => !t.is_owner);
+        return tasks;
+    }, [tasks, filter]);
+
     const fetchTasks = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -128,7 +135,7 @@ const TaskPage = () => {
                         </h2>
                         
                         {/* Barra de Filtros */}
-                        <div className="flex gap-2 mb-4">
+                        <div className="flex gap-2 mb-3">
                             {(['all', 'mine', 'shared'] as const).map((f) => (
                                 <button
                                     key={f}
