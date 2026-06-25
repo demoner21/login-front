@@ -73,7 +73,8 @@ export const Topbar = () => {
     );
 
     return (
-        <header className="flex h-16 flex-shrink-0 items-center justify-between bg-white px-4 lg:px-6 transition-all duration-200 relative z-[1100]">
+        // 👇 Alterado de z-[1100] para z-30
+        <header className="flex h-16 flex-shrink-0 items-center justify-between bg-white px-4 lg:px-6 transition-all duration-200 relative z-30">
             {isSearchOpen ? (
                 <div className="flex w-full items-center gap-2 animate-in fade-in duration-200 justify-center">
                     <div className="relative flex-1 md:flex-none md:w-80">
